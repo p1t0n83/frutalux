@@ -1,0 +1,38 @@
+.footer {
+  background-color: #1f2937;
+  color: white;
+  padding: 3rem 1.5rem;
+}
+
+.footer-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 2rem;
+}
+
+.footer-logo {
+  font-size: 1.5rem;
+  font-weight: bold;
+  font-family: serif;
+  margin-bottom: 1rem;
+}
+
+.footer a {
+  display: block;
+  margin-bottom: 0.5rem;
+  color: #d1d5db;
+  text-decoration: none;
+}
+
+.footer a:hover {
+  color: white;
+}
+
+.footer-bottom {
+  border-top: 1px solid #374151;
+  margin-top: 2rem;
+  padding-top: 1rem;
+  text-align: center;
+  font-size: 0.875rem;
+  color: #9ca3af;
+}

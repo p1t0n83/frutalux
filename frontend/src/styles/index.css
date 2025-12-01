@@ -1,0 +1,41 @@
+:root {
+  font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
+  line-height: 1.5;
+  font-weight: 400;
+  color-scheme: light dark;
+  color: rgba(255, 255, 255, 0.87);
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+}
+
+@media (prefers-color-scheme: light) {
+  :root {
+    color: #213547;
+  }
+}
+
+/* ARREGLO PRINCIPAL - Cambiar display de flex a block */
+body {
+  margin: 0;
+  display: block;
+  min-width: 320px;
+  min-height: 100vh;
+}
+
+/* Clase compartida para centrar contenido en todas las páginas */
+.section-content {
+  max-width: 1200px;
+  margin-left: auto;
+  margin-right: auto;
+  padding-left: 1.5rem;
+  padding-right: 1.5rem;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+/* Utilidad por si necesitas flex-center en algún componente específico */
+.flex-center {
+  display: flex;
+  place-items: center;
+  justify-content: center;
+}

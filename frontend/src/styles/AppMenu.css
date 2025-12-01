@@ -1,0 +1,45 @@
+.menu-header {
+  background-color: #166534; /* verde */
+  color: white;
+  position: sticky;
+  top: 0;
+  z-index: 40;
+}
+
+.menu-container {
+  display: flex;
+  justify-content: space-between; /* logo izquierda, nav derecha */
+  align-items: center;
+  padding: 1rem 1.5rem;
+}
+
+.menu-logo {
+  font-size: 1.5rem;
+  font-weight: bold;
+  font-family: serif;
+  color: white;
+  text-decoration: none;
+}
+
+.menu-desktop {
+  display: flex;        /* 🔧 ahora siempre visible */
+  gap: 1rem;            /* separación entre enlaces */
+}
+
+.menu-link {
+  padding: 0.5rem 1rem;
+  border-radius: 0.375rem;
+  text-decoration: none;
+  color: white;
+  transition: background-color 0.2s ease;
+}
+
+.menu-link:hover {
+  background-color: #14532d;
+}
+
+.menu-link.active {
+  background-color: #0f3f1f;
+}
+
+/* 🔧 eliminamos todo lo relacionado con menú móvil */
