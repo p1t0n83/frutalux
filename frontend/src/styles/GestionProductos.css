@@ -1,0 +1,237 @@
+/* ====== CONTENEDOR PRINCIPAL ====== */
+.gestion-container {
+  min-height: 100vh;
+  background: linear-gradient(to bottom right, #f9fafb, #f3f4f6);
+  padding: 1.5rem;
+}
+
+.gestion-wrapper {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+/* ====== HEADER ====== */
+.gestion-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2rem;
+}
+
+.gestion-title {
+  font-size: 2rem;
+  font-weight: bold;
+  color: #111827;
+}
+
+.btn-nuevo {
+  background-color: #065f46;
+  color: white;
+  padding: 0.75rem 1.5rem;
+  border-radius: 0.5rem;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  transition: background-color 0.2s ease;
+}
+
+.btn-nuevo:hover {
+  background-color: #064e3b;
+}
+
+/* ====== BUSCADOR Y FILTROS ====== */
+.buscador-wrapper {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+  flex-wrap: wrap;
+}
+
+.buscador-input {
+  position: relative;
+  flex: 1;
+  min-width: 300px;
+}
+
+.buscador-icon {
+  position: absolute;
+  left: 1rem;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #9ca3af;
+}
+
+.input-busqueda {
+  width: 100%;
+  padding: 0.75rem 1rem 0.75rem 3rem;
+  border: 2px solid #d1d5db;
+  border-radius: 0.5rem;
+  background: white;
+}
+
+.input-busqueda:focus {
+  border-color: #065f46;
+  outline: none;
+}
+
+.filtros {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.filtro-btn {
+  padding: 0.75rem 1rem;
+  border-radius: 0.5rem;
+  border: 2px solid #d1d5db;
+  background: white;
+  color: #374151;
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+
+.filtro-btn:hover {
+  border-color: #065f46;
+}
+
+.filtro-btn.activo {
+  background: #065f46;
+  color: white;
+}
+
+/* ====== TABLA ====== */
+.tabla-wrapper {
+  background: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 0.75rem;
+  overflow: hidden;
+}
+
+.tabla-scroll {
+  overflow-x: auto;
+}
+
+.tabla-productos {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.tabla-productos th,
+.tabla-productos td {
+  padding: 1rem;
+  border-bottom: 1px solid #f3f4f6;
+}
+
+.tabla-productos th {
+  font-weight: 600;
+  color: #374151;
+  background-color: #f9fafb;
+}
+
+.tabla-productos tr:hover {
+  background-color: #f3f4f6;
+  transition: background-color 0.2s ease;
+}
+
+/* ====== IMAGEN PRODUCTO ====== */
+.producto-img {
+  width: 3rem;
+  height: 3rem;
+  background: linear-gradient(to bottom right, #d1fae5, #bbf7d0);
+  border-radius: 0.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5rem;
+}
+
+.producto-thumb {
+  width: 40px;   /* 👈 más pequeño */
+  height: 40px;
+  border-radius: 0.5rem;
+  object-fit: cover;
+}
+
+/* ====== ESTADO ====== */
+.estado {
+  padding: 0.25rem 0.75rem;
+  border-radius: 9999px;
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+.estado.activo {
+  background: #d1fae5;
+  color: #065f46;
+}
+
+.estado.inactivo {
+  background: #fee2e2;
+  color: #991b1b;
+}
+
+/* ====== ACCIONES ====== */
+.acciones {
+  display: flex;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+.btn-ver,
+.btn-edit,
+.btn-borrar {
+  padding: 0.5rem;
+  border-radius: 0.5rem;
+  transition: background-color 0.2s ease;
+}
+
+.btn-ver {
+  color: #2563eb; /* azul */
+}
+
+.btn-ver:hover {
+  background-color: #eff6ff;
+}
+
+.btn-edit {
+  color: #065f46; /* verde */
+}
+
+.btn-edit:hover {
+  background-color: #ecfdf5;
+}
+
+.btn-borrar {
+  color: #dc2626; /* rojo */
+}
+
+.btn-borrar:hover {
+  background-color: #fef2f2;
+}
+
+/* ====== MENSAJES ====== */
+.mensaje-exito {
+  color: #065f46; /* verde oscuro */
+  margin-top: 10px;
+  font-weight: bold;
+  background-color: #d1fae5; /* verde claro */
+  padding: 0.5rem 1rem;
+  border-radius: 0.5rem;
+}
+
+.mensaje-error {
+  color: #991b1b; /* rojo oscuro */
+  margin-top: 10px;
+  font-weight: bold;
+  background-color: #fee2e2; /* rojo claro */
+  padding: 0.5rem 1rem;
+  border-radius: 0.5rem;
+}
+
+/* ====== ERRORES ====== */
+.error-popup {
+  color: red;
+  font-weight: 600;
+  margin: 1rem 0;
+  text-align: center;
+}

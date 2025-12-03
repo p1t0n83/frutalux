@@ -10,6 +10,8 @@ use App\Http\Controllers\Api\SuscripcionController;
 use App\Http\Controllers\Api\ValoracionController;
 use App\Http\Controllers\Api\NotificacionController;
 use App\Http\Controllers\Api\AuthController;
+use App\Http\Controllers\Api\ProductoImagenController;
+use App\Http\Controllers\Api\FacturaController;
 
 /*
 |--------------------------------------------------------------------------
@@ -46,19 +48,58 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('me', [AuthController::class, 'me']);
     Route::post('logout', [AuthController::class, 'logout']);
     
-    // Recursos protegidos
+    // Perfil cliente
+    Route::put('cliente/perfil', [AuthController::class, 'updatePerfil']);
+    Route::put('cliente/password', [AuthController::class, 'updatePassword']);
+
+    // Usuarios
     Route::apiResource('usuarios', UserController::class)
         ->parameters(['usuarios' => 'usuario']);
-    
+
+    // Pedidos
     Route::apiResource('pedidos', PedidoController::class)
         ->parameters(['pedidos' => 'pedido']);
-    
-    Route::apiResource('carritos', CarritoController::class)
-        ->parameters(['carritos' => 'carrito']);
-    
+
+    /*
+    |--------------------------------------------------------------------------
+    | Carrito del usuario autenticado
+    |--------------------------------------------------------------------------
+    */
+    Route::get('carrito', [CarritoController::class, 'show']);          // obtener carrito
+    Route::post('carrito/add', [CarritoController::class, 'addItem']);  // añadir producto
+    Route::put('carrito/items/{item}', [CarritoController::class, 'updateItem']); // actualizar cantidad
+    Route::delete('carrito/items/{item}', [CarritoController::class, 'removeItem']); // eliminar producto
+    Route::delete('carrito/clear', [CarritoController::class, 'clearCarrito']);     // vaciar carrito
+
+    // Suscripciones
     Route::apiResource('suscripciones', SuscripcionController::class)
         ->parameters(['suscripciones' => 'suscripcion']);
-    
+
+    // Notificaciones
     Route::apiResource('notificaciones', NotificacionController::class)
         ->parameters(['notificaciones' => 'notificacion']);
+
+    /*
+    |--------------------------------------------------------------------------
+    | Productos protegidos (crear, editar, borrar)
+    |--------------------------------------------------------------------------
+    */
+    Route::apiResource('productos', ProductoController::class)
+        ->only(['store', 'update', 'destroy'])
+        ->parameters(['productos' => 'producto']);
+
+    /*
+    |--------------------------------------------------------------------------
+    | Imágenes de productos (subir y borrar)
+    |--------------------------------------------------------------------------
+    */
+    Route::post('productos/{producto}/imagenes', [ProductoImagenController::class, 'store']);
+    Route::delete('productos/{producto}/imagenes/{imagen}', [ProductoImagenController::class, 'destroy']);
+
+    /*
+    |--------------------------------------------------------------------------
+    | Facturas (generar PDF y guardar)
+    |--------------------------------------------------------------------------
+    */
+    Route::post('facturas', [FacturaController::class, 'generar']);
 });

@@ -19,35 +19,75 @@
 }
 
 .detalle-main-image {
+  position: relative; /* ✅ necesario para las flechas */
   background: linear-gradient(to bottom right, #dcfce7, #bbf7d0);
   border-radius: 1rem;
   height: 24rem;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 8rem;
+  overflow: hidden;
   box-shadow: 0 4px 10px rgba(0,0,0,0.1);
 }
 
+.detalle-main-image img.detalle-cover {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 1rem;
+}
+
+/* ✅ Botones del carrusel */
+.carousel-btn {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  background: rgba(255,255,255,0.8);
+  border: none;
+  cursor: pointer;
+  padding: 0.5rem;
+  border-radius: 50%;
+  transition: background 0.2s;
+}
+.carousel-btn:hover {
+  background: rgba(255,255,255,1);
+}
+.carousel-btn.left {
+  left: 1rem;
+}
+.carousel-btn.right {
+  right: 1rem;
+}
+
 .detalle-thumbs {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  display: flex;
   gap: 0.75rem;
+  margin-top: 0.5rem;
 }
 
 .detalle-thumb {
-  background: linear-gradient(to bottom right, #dcfce7, #bbf7d0);
+  background: #f3f4f6;
   border-radius: 0.5rem;
-  height: 6rem;
+  width: 5rem;
+  height: 5rem;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 2rem;
   cursor: pointer;
+  overflow: hidden;
+  border: 2px solid transparent;
   transition: 0.2s;
 }
+.detalle-thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
 .detalle-thumb:hover {
-  outline: 2px solid #166534;
+  border-color: #166534;
+}
+.detalle-thumb.active {
+  border-color: #166534; /* ✅ marca la miniatura activa */
 }
 
 .detalle-info {
@@ -180,4 +220,34 @@
 }
 .review-stars {
   display: flex;
+}
+
+/* ====== MENSAJES FLOTANTES ====== */
+.mensaje-exito {
+  margin-top: 1rem;
+  background-color: #d1fae5; /* verde claro */
+  color: #166534;            /* verde oscuro */
+  padding: 0.75rem 1rem;
+  border-radius: 0.5rem;
+  font-weight: 600;
+  text-align: center;
+}
+
+.mensaje-error {
+  margin-top: 1rem;
+  background-color: #fee2e2; /* rojo claro */
+  color: #991b1b;            /* rojo oscuro */
+  padding: 0.75rem 1rem;
+  border-radius: 0.5rem;
+  font-weight: 600;
+  text-align: center;
+}
+
+
+/* Animación para aparecer y desaparecer */
+@keyframes fadeInOut {
+  0% { opacity: 0; transform: translateY(20px); }
+  10% { opacity: 1; transform: translateY(0); }
+  90% { opacity: 1; transform: translateY(0); }
+  100% { opacity: 0; transform: translateY(20px); }
 }

@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\Producto;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 
 class ProductoController extends Controller
 {
@@ -42,8 +43,21 @@ class ProductoController extends Controller
 
     public function destroy($id)
     {
-        Producto::destroy($id);
-        return response()->json(null, 204);
+        $producto = Producto::with('imagenes')->findOrFail($id);
+
+        // ✅ Borrar imágenes físicas asociadas
+        foreach ($producto->imagenes as $imagen) {
+            if ($imagen->nombre_imagen) {
+                Storage::disk('public')->delete('imagenes/' . $imagen->nombre_imagen);
+            }
+        }
+
+        // ✅ Si usas carpetas por producto (ej: /imagenes/producto_{id})
+        Storage::disk('public')->deleteDirectory('imagenes/producto_' . $producto->id);
+
+        // ✅ Borrar el producto (esto cascada las filas de imagenes_producto)
+        $producto->delete();
+
+        return response()->json(['message' => 'Producto e imágenes eliminados'], 200);
     }
 }
-

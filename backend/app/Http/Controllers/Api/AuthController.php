@@ -113,4 +113,47 @@ class AuthController extends Controller
 
         return response()->json($user);
     }
+
+    public function updatePerfil(Request $request)
+    {
+        $user = $request->user();
+
+        $validated = $request->validate([
+            'nombre' => 'required|string|max:255',
+            'apellidos' => 'required|string|max:255',
+            'email' => 'required|email|unique:users,email,' . $user->id,
+            'telefono' => 'nullable|string|max:20',
+            'direccion' => 'nullable|string',
+            'codigo_postal' => 'nullable|string|max:10',
+            'localidad' => 'nullable|string|max:255',
+            'provincia' => 'nullable|string|max:255',
+        ]);
+
+        $user->update($validated);
+
+        return response()->json([
+            'message' => 'Perfil actualizado correctamente',
+            'user' => $user
+        ]);
+    }
+
+    public function updatePassword(Request $request)
+    {
+        $user = $request->user();
+
+        $request->validate([
+            'current' => 'required|string',
+            'new' => 'required|string|min:8'
+        ]);
+
+        if (!Hash::check($request->current, $user->password)) {
+            return response()->json(['message' => 'Contraseña actual incorrecta'], 403);
+        }
+
+        $user->password = Hash::make($request->new);
+        $user->save();
+
+        return response()->json(['message' => 'Contraseña actualizada correctamente']);
+    }
+
 }

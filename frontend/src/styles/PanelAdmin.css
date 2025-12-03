@@ -1,0 +1,208 @@
+/* ===== Contenedor principal ===== */
+.panel-container {
+  min-height: 100vh;
+  background: linear-gradient(to bottom right, #f9fafb, #f3f4f6);
+  padding: 1.5rem;
+}
+
+.panel-wrapper {
+  max-width: 1280px;
+  margin: auto;
+}
+
+.panel-title {
+  font-size: 2.5rem;
+  font-weight: bold;
+  margin-bottom: 2rem;
+  color: #111827;
+}
+
+/* ===== Stats ===== */
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.stat-card {
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: 0.75rem;
+  padding: 1.5rem;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+}
+
+.stat-icon {
+  width: 3rem;
+  height: 3rem;
+  border-radius: 0.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 1rem;
+}
+
+.stat-icon.blue { background: #dbeafe; color: #1e40af; }
+.stat-icon.green { background: #d1fae5; color: #065f46; }
+.stat-icon.purple { background: #ede9fe; color: #5b21b6; }
+.stat-icon.orange { background: #ffedd5; color: #9a3412; }
+
+.stat-label {
+  color: #4b5563;
+  font-size: 0.875rem;
+  margin-bottom: 0.25rem;
+}
+
+.stat-value {
+  font-size: 1.875rem;
+  font-weight: bold;
+  color: #111827;
+}
+
+/* ===== Accesos Rápidos ===== */
+.quick-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.quick-card {
+  background: #fff;
+  border: 2px solid #e5e7eb;
+  border-radius: 0.75rem;
+  padding: 1.5rem;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.quick-card:hover {
+  border-color: #065f46;
+}
+
+.quick-header {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 1rem;
+}
+
+.quick-icon {
+  width: 2rem;
+  height: 2rem;
+  color: #065f46;
+}
+
+.quick-arrow {
+  width: 1.25rem;
+  height: 1.25rem;
+  color: #9ca3af;
+}
+
+.quick-title {
+  font-size: 1.25rem;
+  font-weight: bold;
+  color: #111827;
+  margin-bottom: 0.5rem;
+}
+
+.quick-text {
+  color: #4b5563;
+  font-size: 0.875rem;
+}
+
+/* ===== Pedidos Recientes ===== */
+.pedidos-card {
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: 0.75rem;
+  padding: 2rem;
+}
+
+.pedidos-title {
+  font-size: 1.5rem;
+  font-weight: bold;
+  margin-bottom: 1.5rem;
+  color: #111827;
+}
+
+.pedidos-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.pedidos-table th {
+  text-align: left;
+  padding: 0.75rem 1rem;
+  font-weight: 600;
+  color: #374151;
+  border-bottom: 2px solid #e5e7eb;
+}
+
+.pedidos-table td {
+  padding: 1rem;
+  color: #111827;
+  border-bottom: 1px solid #f3f4f6;
+}
+
+.pedido-link {
+  color: #065f46;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.pedido-link:hover {
+  text-decoration: underline;
+}
+
+.pedido-tipo {
+  background: #f3f4f6;
+  color: #374151;
+  padding: 0.25rem 0.75rem;
+  border-radius: 9999px;
+  font-size: 0.875rem;
+}
+
+.pedido-estado {
+  padding: 0.25rem 0.75rem;
+  border-radius: 9999px;
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+.pedido-estado.entregado {
+  background: #d1fae5;
+  color: #065f46;
+}
+
+.pedido-estado.enviado {
+  background: #dbeafe;
+  color: #1e40af;
+}
+
+.pedido-estado.preparando {
+  background: #fef3c7;
+  color: #92400e;
+}
+
+.pedido-estado.pendiente {
+  background: #f3f4f6;
+  color: #374151;
+}
+
+.pedido-total {
+  text-align: right;
+  font-weight: bold;
+  color: #111827;
+}
+
+/* ===== Mensajes de error ===== */
+.error-popup {
+  background-color: #f44336;
+  color: white;
+  padding: 10px 15px;
+  margin-bottom: 15px;
+  border-radius: 5px;
+  text-align: center;
+  font-weight: bold;
+}

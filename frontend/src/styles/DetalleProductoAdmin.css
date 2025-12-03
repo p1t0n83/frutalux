@@ -1,0 +1,145 @@
+/* ====== CONTENEDOR PRINCIPAL ====== */
+.detalle-container {
+  min-height: 100vh;
+  background: linear-gradient(to bottom right, #f9fafb, #f3f4f6);
+  padding: 1.5rem;
+}
+
+/* ====== HEADER ====== */
+.detalle-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2rem;
+}
+
+.detalle-header h1 {
+  font-size: 2rem;
+  font-weight: bold;
+  color: #111827;
+}
+
+.btn-back {
+  padding: 0.5rem;
+  border-radius: 0.5rem;
+  transition: background-color 0.2s ease;
+}
+
+.btn-back:hover {
+  background-color: #e5e7eb;
+}
+
+.acciones {
+  display: flex;
+  gap: 0.75rem;
+}
+
+.btn-save {
+  background-color: #065f46;
+  color: white;
+  padding: 0.75rem 1.5rem;
+  border-radius: 0.5rem;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  transition: background-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.btn-save:hover {
+  background-color: #064e3b;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+}
+
+.btn-delete {
+  border: 2px solid #dc2626;
+  color: #dc2626;
+  padding: 0.75rem 1.5rem;
+  border-radius: 0.5rem;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  transition: background-color 0.2s ease;
+}
+
+.btn-delete:hover {
+  background-color: #fee2e2;
+}
+
+/* ====== FORMULARIO ====== */
+.detalle-container form,
+.detalle-container .form-section {
+  background: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 0.75rem;
+  padding: 1.5rem;
+  margin-bottom: 1.5rem;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+}
+
+.detalle-container label {
+  display: block;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #374151;
+  margin-bottom: 0.5rem;
+}
+
+.detalle-container input,
+.detalle-container textarea,
+.detalle-container select {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  border: 2px solid #d1d5db;
+  border-radius: 0.5rem;
+  background: white;
+  transition: border-color 0.2s ease;
+}
+
+.detalle-container input:focus,
+.detalle-container textarea:focus,
+.detalle-container select:focus {
+  border-color: #065f46;
+  outline: none;
+}
+
+.imagenes-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+  gap: 1rem;
+}
+
+.imagen-item {
+  position: relative;
+  border: 1px solid #e5e7eb;
+  border-radius: 0.5rem;
+  overflow: hidden;
+  background: #f9fafb;
+}
+
+.imagen-preview {
+  width: 100%;
+  height: 100px;
+  object-fit: cover;
+}
+
+.imagen-item .btn-delete {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  padding: 0.25rem 0.5rem;
+  font-size: 0.75rem;
+}
+
+
+
+/* ====== ERRORES ====== */
+.error-popup {
+  color: #dc2626;
+  font-weight: 600;
+  margin: 1rem 0;
+  text-align: center;
+}
+
+

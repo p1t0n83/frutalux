@@ -1,13 +1,27 @@
 import React, { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
-import { Star, MapPin, ShoppingCart, Leaf, Calendar, Award } from "lucide-react";
+import {
+  Star,
+  MapPin,
+  ShoppingCart,
+  Leaf,
+  Calendar,
+  Award,
+  ChevronLeft,
+  ChevronRight,
+} from "lucide-react";
 import { fetchProductoById } from "../services/productosService";
+import { useCarrito } from "../context/CarritoContext"; 
 import "../styles/DetalleProducto.css";
 
 export default function DetalleProducto() {
-  const { id } = useParams(); // 👈 id dinámico de la URL
+  const { id } = useParams();
   const [producto, setProducto] = useState(null);
   const [cantidad, setCantidad] = useState(1);
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const [mensaje, setMensaje] = useState(""); // 👈 estado para mensaje
+
+  const { addItem } = useCarrito();
 
   useEffect(() => {
     fetchProductoById(id)
@@ -17,25 +31,66 @@ export default function DetalleProducto() {
 
   if (!producto) return <p>Cargando producto...</p>;
 
+  const imagenes = producto.imagenes || [];
+  const portada =
+    imagenes.length > 0 ? imagenes[currentIndex].url_imagen : "/images/default-product.jpg";
+
+  const prevImage = () => {
+    setCurrentIndex((prev) => (prev === 0 ? imagenes.length - 1 : prev - 1));
+  };
+
+  const nextImage = () => {
+    setCurrentIndex((prev) => (prev === imagenes.length - 1 ? 0 : prev + 1));
+  };
+
+  const handleAddToCarrito = async () => {
+    try {
+      await addItem({
+        producto_id: producto.id,
+        cantidad_kg: parseFloat(cantidad),
+        precio_unitario: producto.precio_kg,
+      });
+      setMensaje("✅ Producto añadido al carrito");
+      setTimeout(() => setMensaje(""), 3000);
+    } catch (err) {
+      console.error("Error añadiendo al carrito:", err);
+      setMensaje("❌ No se pudo añadir al carrito");
+      setTimeout(() => setMensaje(""), 3000);
+    }
+  };
+
   return (
     <div className="detalle-container">
       <div className="detalle-grid">
-        {/* Imágenes */}
+        {/* Carrusel de imágenes */}
         <div className="detalle-images">
           <div className="detalle-main-image">
-            {producto.imagenes?.[0]?.url ? (
-              <img src={producto.imagenes[0].url} alt={producto.nombre} />
-            ) : (
-              <span className="text-9xl">🥬</span>
+            <img src={portada} alt={producto.nombre} className="detalle-cover" />
+            {imagenes.length > 1 && (
+              <>
+                <button className="carousel-btn left" onClick={prevImage}>
+                  <ChevronLeft className="w-6 h-6" />
+                </button>
+                <button className="carousel-btn right" onClick={nextImage}>
+                  <ChevronRight className="w-6 h-6" />
+                </button>
+              </>
             )}
           </div>
-          <div className="detalle-thumbs">
-            {producto.imagenes?.map((img, i) => (
-              <div key={i} className="detalle-thumb">
-                <img src={img.url} alt={`${producto.nombre} ${i}`} />
-              </div>
-            ))}
-          </div>
+
+          {imagenes.length > 1 && (
+            <div className="detalle-thumbs">
+              {imagenes.map((img, i) => (
+                <div
+                  key={i}
+                  className={`detalle-thumb ${i === currentIndex ? "active" : ""}`}
+                  onClick={() => setCurrentIndex(i)}
+                >
+                  <img src={img.url_imagen} alt={`${producto.nombre} ${i}`} />
+                </div>
+              ))}
+            </div>
+          )}
         </div>
 
         {/* Información */}
@@ -43,7 +98,10 @@ export default function DetalleProducto() {
           <h1 className="detalle-title">{producto.nombre}</h1>
           <div className="detalle-location">
             <MapPin className="icon-small" />
-            <p>{producto.nombre_productor || "Productor desconocido"} - {producto.origen || "Origen no especificado"}</p>
+            <p>
+              {producto.nombre_productor || "Productor desconocido"} -{" "}
+              {producto.origen || "Origen no especificado"}
+            </p>
           </div>
 
           <div className="detalle-tags">
@@ -56,7 +114,8 @@ export default function DetalleProducto() {
           </div>
 
           <div className="detalle-price">
-            €{producto.precio_kg}<span>/kg</span>
+            €{producto.precio_kg}
+            <span>/kg</span>
           </div>
 
           <div className="detalle-stock">
@@ -81,11 +140,18 @@ export default function DetalleProducto() {
                 className="detalle-input"
               />
             </div>
-            <button className="detalle-button">
+            <button className="detalle-button" onClick={handleAddToCarrito}>
               <ShoppingCart className="icon-small" />
               AÑADIR AL CARRITO
             </button>
           </div>
+
+          {/* Mensaje debajo del botón */}
+          {mensaje && (
+            <div className={mensaje.includes("✅") ? "mensaje-exito" : "mensaje-error"}>
+              {mensaje}
+            </div>
+          )}
         </div>
       </div>
 

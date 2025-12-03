@@ -10,7 +10,9 @@ export default function CatalogoPage() {
   const [selectedCategory, setSelectedCategory] = React.useState("all");
 
   React.useEffect(() => {
-    fetchProductos().then(setProductos);
+    fetchProductos().then(setProductos).catch((err) => {
+      console.error("Error cargando productos:", err);
+    });
   }, []);
 
   const filteredProducts = productos.filter((p) => {
@@ -66,34 +68,45 @@ export default function CatalogoPage() {
 
         {/* Grid */}
         <div className="products-grid">
-          {filteredProducts.map((prod, i) => (
-            <Link key={i} to={`/producto/${prod.id}`} className="product-link">
-              <div className="product-card">
-                <div className="product-image">
-                  <div className="product-emoji">🥬</div>
-                </div>
-                <div className="product-info">
-                  <h3 className="product-name">{prod.nombre || "Sin nombre"}</h3>
-                  <p className="product-producer">
-                    {prod.nombre_productor || prod.productor || "Productor desconocido"}
-                  </p>
-                  <div className="product-origin">
-                    <MapPin className="icon-small" />
-                    <span>{prod.origen || "Origen no especificado"}</span>
+          {filteredProducts.map((prod, i) => {
+            const portada =
+              prod.imagenes && prod.imagenes.length > 0
+                ? prod.imagenes[0].url_imagen
+                : "/images/default-product.jpg";
+
+            return (
+              <Link key={i} to={`/producto/${prod.id}`} className="product-link">
+                <div className="product-card">
+                  <div className="product-image">
+                    <img
+                      src={portada}
+                      alt={prod.nombre || "Imagen de producto"}
+                      className="product-cover"
+                    />
                   </div>
-                  <p className="product-category">
-                    {prod.categoria?.nombre || "Sin categoría"}
-                  </p>
-                  <div className="product-price-box">
-                    <span className="product-price">
-                      €{prod.precio_kg || prod.precio || 0}
-                    </span>
-                    <span className="product-unit">/kg</span>
+                  <div className="product-info">
+                    <h3 className="product-name">{prod.nombre || "Sin nombre"}</h3>
+                    <p className="product-producer">
+                      {prod.nombre_productor || prod.productor || "Productor desconocido"}
+                    </p>
+                    <div className="product-origin">
+                      <MapPin className="icon-small" />
+                      <span>{prod.origen || "Origen no especificado"}</span>
+                    </div>
+                    <p className="product-category">
+                      {prod.categoria?.nombre || "Sin categoría"}
+                    </p>
+                    <div className="product-price-box">
+                      <span className="product-price">
+                        €{prod.precio_kg || prod.precio || 0}
+                      </span>
+                      <span className="product-unit">/kg</span>
+                    </div>
                   </div>
                 </div>
-              </div>
-            </Link>
-          ))}
+              </Link>
+            );
+          })}
         </div>
 
         {filteredProducts.length === 0 && (

@@ -1,0 +1,254 @@
+/* Contenedor principal */
+.perfil-container {
+  min-height: 100vh;
+  background: linear-gradient(to bottom right, #f0fdf4, #ffffff);
+  padding: 1.5rem;
+}
+
+.perfil-wrapper {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+/* Título principal */
+.perfil-title {
+  font-size: 2.5rem;
+  font-weight: bold;
+  margin-bottom: 2rem;
+  color: #111827;
+}
+
+/* Tabs */
+.perfil-tabs {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 2rem;
+  overflow-x: auto;
+}
+
+.perfil-tab {
+  padding: 0.75rem 1.5rem;
+  border-radius: 0.5rem;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  border: 2px solid #d1d5db;
+  color: #374151;
+  background: #fff;
+  transition: all 0.2s;
+  cursor: pointer;
+}
+
+.perfil-tab:hover {
+  border-color: #065f46;
+}
+
+.perfil-tab.active {
+  background: #065f46;
+  color: #fff;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+
+.tab-icon {
+  width: 20px;
+  height: 20px;
+}
+
+/* Tarjetas */
+.perfil-card {
+  background: #fff;
+  border: 1px solid #d1d5db;
+  border-radius: 1rem;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+  padding: 2rem;
+}
+
+.perfil-subtitle {
+  font-size: 1.5rem;
+  font-weight: bold;
+  margin-bottom: 1.5rem;
+  color: #111827;
+}
+
+/* Grid de inputs */
+.perfil-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1.5rem;
+}
+
+@media (min-width: 768px) {
+  .perfil-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+.col-span-2 {
+  grid-column: span 2;
+}
+
+/* Inputs */
+.perfil-label {
+  display: block;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #374151;
+  margin-bottom: 0.5rem;
+}
+
+.perfil-input {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  border: 2px solid #d1d5db;
+  border-radius: 0.5rem;
+  font-size: 1rem;
+  color: #111827;
+  transition: border-color 0.2s;
+}
+
+.perfil-input:focus {
+  outline: none;
+  border-color: #065f46;
+}
+
+/* Botones */
+.perfil-btn {
+  margin-top: 1.5rem;
+  background: #065f46;
+  color: #fff;
+  padding: 0.75rem 2rem;
+  border-radius: 0.5rem;
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  cursor: pointer;
+  transition: background 0.2s;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+
+.perfil-btn:hover {
+  background: #064e3b;
+}
+
+/* Pedidos */
+.pedido-item {
+  border: 2px solid #d1d5db;
+  border-radius: 0.75rem;
+  padding: 1.5rem;
+  transition: border-color 0.2s;
+}
+
+.pedido-item:hover {
+  border-color: #065f46;
+}
+
+.pedido-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.pedido-numero {
+  font-weight: bold;
+  color: #111827;
+}
+
+.pedido-fecha {
+  font-size: 0.875rem;
+  color: #6b7280;
+}
+
+.pedido-info {
+  text-align: right;
+}
+
+.pedido-estado {
+  padding: 0.25rem 1rem;
+  border-radius: 9999px;
+  font-size: 0.875rem;
+  font-weight: 600;
+}
+
+.pedido-estado.entregado {
+  background: #dcfce7;
+  color: #065f46;
+}
+
+.pedido-estado.preparando {
+  background: #fef9c3;
+  color: #854d0e;
+}
+
+.pedido-total {
+  font-size: 1.125rem;
+  font-weight: bold;
+  color: #111827;
+  margin-top: 0.5rem;
+}
+
+/* Notificaciones */
+.notif-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border: 2px solid #d1d5db;
+  border-radius: 0.75rem;
+  padding: 1rem;
+  cursor: pointer;
+  transition: border-color 0.2s;
+}
+
+.notif-item:hover {
+  border-color: #065f46;
+}
+
+.notif-title {
+  font-weight: 600;
+  color: #111827;
+}
+
+.notif-desc {
+  font-size: 0.875rem;
+  color: #6b7280;
+}
+
+.notif-checkbox {
+  width: 20px;
+  height: 20px;
+  accent-color: #065f46;
+}
+
+/* Mensajes */
+.error-text {
+  color: #dc2626;
+  font-weight: 600;
+  text-align: center;
+}
+
+.loading-text {
+  color: #374151;
+  text-align: center;
+}
+
+
+.success-popup {
+  background-color: #4caf50;
+  color: white;
+  padding: 10px 15px;
+  margin-bottom: 15px;
+  border-radius: 5px;
+  text-align: center;
+  font-weight: bold;
+}
+
+.error-popup {
+  background-color: #f44336;
+  color: white;
+  padding: 10px 15px;
+  margin-bottom: 15px;
+  border-radius: 5px;
+  text-align: center;
+  font-weight: bold;
+}

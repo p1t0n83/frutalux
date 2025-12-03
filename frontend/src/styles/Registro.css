@@ -1,0 +1,152 @@
+/* CONTENEDOR PRINCIPAL */
+.registro-container {
+  min-height: 100vh;
+  background: linear-gradient(to bottom right, #f0fdf4, #dcfce7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+}
+
+/* CARD CENTRAL */
+.registro-card {
+  width: 100%;
+  max-width: 600px;
+  background: white;
+  border-radius: 1rem;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+  padding: 2rem;
+}
+
+/* ENCABEZADO */
+.registro-header {
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
+.registro-header .logo {
+  font-size: 2rem;
+  font-weight: bold;
+  color: #166534;
+  font-family: serif;
+  margin-bottom: 0.5rem;
+}
+
+.registro-header h1 {
+  font-size: 1.75rem;
+  font-weight: bold;
+  color: #111827;
+}
+
+.registro-header p {
+  color: #6b7280;
+  margin-top: 0.25rem;
+}
+
+/* MENSAJE DE ERROR */
+.error-message {
+  background: #fee2e2;
+  color: #b91c1c;
+  padding: 0.75rem;
+  border-radius: 0.5rem;
+  text-align: center;
+  margin-bottom: 1rem;
+  font-weight: 600;
+}
+
+/* FORMULARIO */
+.registro-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+/* GRILLA DE CAMPOS DOBLES */
+.form-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}
+
+/* GRUPO DE CAMPO */
+.form-group {
+  display: flex;
+  flex-direction: column;
+}
+
+/* ETIQUETAS */
+.form-group label {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #374151;
+  margin-bottom: 0.25rem;
+}
+
+/* CAMPOS CON ICONO */
+.input-icon {
+  position: relative;
+}
+
+.input-icon .icon {
+  position: absolute;
+  left: 0.75rem;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 1.25rem;
+  height: 1.25rem;
+  color: #9ca3af;
+}
+
+.input-icon input {
+  padding-left: 2.5rem;
+}
+
+/* INPUTS GENERALES */
+input {
+  width: 100%;
+  padding: 0.75rem;
+  border: 2px solid #d1d5db;
+  border-radius: 0.5rem;
+  font-size: 0.95rem;
+  transition: border-color 0.2s;
+  box-sizing: border-box;
+}
+
+input:focus {
+  outline: none;
+  border-color: #166534;
+}
+
+/* BOTÓN DE ENVÍO */
+.btn-submit {
+  width: 100%;
+  background: #166534;
+  color: white;
+  padding: 0.75rem;
+  border-radius: 0.75rem;
+  font-weight: 600;
+  transition: background 0.2s;
+  margin-top: 1rem;
+}
+
+.btn-submit:hover {
+  background: #14532d;
+}
+
+/* LINK DE LOGIN */
+.login-link {
+  text-align: center;
+  margin-top: 1rem;
+  font-size: 0.875rem;
+  color: #6b7280;
+}
+
+.login-link a {
+  color: #166534;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.login-link a:hover {
+  color: #14532d;
+}

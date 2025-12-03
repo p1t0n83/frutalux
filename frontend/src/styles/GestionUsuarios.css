@@ -1,0 +1,170 @@
+.gestion-container {
+  min-height: 100vh;
+  background: linear-gradient(to bottom right, #f9fafb, #f3f4f6);
+  padding: 2rem;
+}
+
+.gestion-wrapper {
+  max-width: 1280px;
+  margin: 0 auto;
+}
+
+.gestion-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2rem;
+}
+
+.gestion-title {
+  font-size: 2.5rem;
+  font-weight: bold;
+  color: #111827;
+}
+
+.btn-nuevo {
+  background-color: #065f46;
+  color: white;
+  padding: 0.75rem 1.5rem;
+  border-radius: 0.5rem;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  transition: background 0.2s ease;
+}
+
+.btn-nuevo:hover {
+  background-color: #064e3b;
+}
+
+.buscador-wrapper {
+  margin-bottom: 1.5rem;
+}
+
+.buscador-input {
+  position: relative;
+}
+
+.buscador-icon {
+  position: absolute;
+  left: 1rem;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #9ca3af;
+}
+
+.input-busqueda {
+  width: 100%;
+  padding: 1rem 1rem 1rem 3rem;
+  border: 2px solid #d1d5db;
+  border-radius: 0.5rem;
+  background-color: white;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+}
+
+.input-busqueda:focus {
+  border-color: #065f46;
+  outline: none;
+}
+
+.tabla-wrapper {
+  background-color: white;
+  border-radius: 0.75rem;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+  border: 1px solid #e5e7eb;
+  overflow: hidden;
+}
+
+.tabla-scroll {
+  overflow-x: auto;
+}
+
+.tabla-usuarios {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.tabla-usuarios th,
+.tabla-usuarios td {
+  padding: 1rem;
+  text-align: left;
+  border-bottom: 1px solid #f3f4f6;
+}
+
+.tabla-usuarios th {
+  background-color: #f9fafb;
+  font-weight: 600;
+  color: #374151;
+}
+
+.badge {
+  padding: 0.25rem 0.75rem;
+  border-radius: 9999px;
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+.badge.admin {
+  background-color: #ede9fe;
+  color: #6b21a8;
+}
+
+.badge.cliente {
+  background-color: #dbeafe;
+  color: #1e3a8a;
+}
+
+.estado {
+  padding: 0.25rem 0.75rem;
+  border-radius: 9999px;
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+.estado.activo {
+  background-color: #d1fae5;
+  color: #065f46;
+}
+
+.estado.inactivo {
+  background-color: #fee2e2;
+  color: #991b1b;
+}
+
+.acciones {
+  display: flex;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+.btn-ver {
+  color: #2563eb;
+  padding: 0.5rem;
+  border-radius: 0.5rem;
+  transition: background 0.2s ease;
+}
+
+.btn-ver:hover {
+  background-color: #eff6ff;
+}
+
+.btn-borrar {
+  color: #dc2626;
+  padding: 0.5rem;
+  border-radius: 0.5rem;
+  transition: background 0.2s ease;
+}
+
+.btn-borrar:hover {
+  background-color: #fee2e2;
+}
+
+.error-popup {
+  color: #b91c1c;
+  background-color: #fee2e2;
+  padding: 1rem;
+  border-radius: 0.5rem;
+  font-weight: 600;
+  text-align: center;
+}

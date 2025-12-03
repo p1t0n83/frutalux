@@ -14,7 +14,8 @@ return new class extends Migration
         Schema::create('imagenes_producto', function (Blueprint $table) {
             $table->id();
             $table->foreignId('producto_id')->constrained('productos')->onDelete('cascade');
-            $table->string('url_imagen', 255);
+            $table->string('nombre_imagen', 255); // 👈 nuevo campo para el nombre del archivo
+            $table->string('url_imagen', 255);    // 👈 aquí guardaremos la URL completa
             $table->boolean('es_principal')->default(false);
             $table->integer('orden')->default(0);
             $table->timestamps();

@@ -1,6 +1,6 @@
 export async function fetchProductos() {
   try {
-    const response = await fetch("http://localhost:8000/api/productos"); // ajusta la URL si usas Laravel
+    const response = await fetch("http://localhost:8000/api/productos"); 
     if (!response.ok) throw new Error("Error al cargar productos");
     return await response.json();
   } catch (error) {

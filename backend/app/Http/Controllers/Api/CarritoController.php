@@ -4,40 +4,115 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\Carrito;
+use App\Models\CarritoItem;
 use Illuminate\Http\Request;
 
 class CarritoController extends Controller
 {
+    // Devuelve todos los carritos (solo para administración)
     public function index()
     {
         return Carrito::with('usuario','items.producto')->get();
     }
 
-    public function store(Request $request)
+    // Devuelve el carrito del usuario autenticado, lo crea si no existe
+    public function show(Request $request)
     {
+        $user = $request->user();
+
+        $carrito = Carrito::firstOrCreate(
+            ['user_id' => $user->id],
+            ['estado' => 'activo'] // si tienes campo estado
+        );
+
+        return response()->json($carrito->load('usuario','items.producto'));
+    }
+
+    // Actualiza datos del carrito (ej: cambiar user_id si fuese necesario)
+    public function update(Request $request)
+    {
+        $user = $request->user();
+        $carrito = Carrito::firstOrCreate(['user_id' => $user->id]);
+
+        $carrito->update($request->only('estado')); // ejemplo si quieres actualizar estado
+
+        return response()->json($carrito->load('usuario','items.producto'));
+    }
+
+    // Elimina el carrito del usuario autenticado
+    public function destroy(Request $request)
+    {
+        $user = $request->user();
+        $carrito = Carrito::where('user_id', $user->id)->first();
+
+        if ($carrito) {
+            $carrito->delete();
+        }
+
+        return response()->json(null, 204);
+    }
+
+    // -----------------------------
+    // Métodos para items del carrito
+    // -----------------------------
+
+    public function addItem(Request $request)
+    {
+        $user = $request->user();
+        $carrito = Carrito::firstOrCreate(['user_id' => $user->id]);
+
         $validated = $request->validate([
-            'user_id' => 'required|exists:users,id',
+            'producto_id'    => 'required|exists:productos,id',
+            'cantidad_kg'    => 'required|numeric|min:0.5',
+            'precio_unitario'=> 'required|numeric|min:0',
         ]);
 
-        $carrito = Carrito::create($validated);
-        return response()->json($carrito, 201);
+        $item = $carrito->items()->where('producto_id', $validated['producto_id'])->first();
+
+        if ($item) {
+            $item->cantidad_kg += $validated['cantidad_kg'];
+            $item->precio_unitario = $validated['precio_unitario'];
+            $item->save();
+        } else {
+            $item = $carrito->items()->create($validated);
+        }
+
+        return response()->json($carrito->load('items.producto'));
     }
 
-    public function show($id)
+    public function updateItem(Request $request, $itemId)
     {
-        return Carrito::with('usuario','items.producto')->findOrFail($id);
+        $user = $request->user();
+        $carrito = Carrito::firstOrCreate(['user_id' => $user->id]);
+
+        $validated = $request->validate([
+            'cantidad_kg' => 'required|numeric|min:0.5',
+        ]);
+
+        $item = $carrito->items()->findOrFail($itemId);
+        $item->update($validated);
+
+        return response()->json($carrito->load('items.producto'));
     }
 
-    public function update(Request $request, $id)
+    public function removeItem(Request $request, $itemId)
     {
-        $carrito = Carrito::findOrFail($id);
-        $carrito->update($request->all());
-        return response()->json($carrito);
+        $user = $request->user();
+        $carrito = Carrito::firstOrCreate(['user_id' => $user->id]);
+
+        $item = $carrito->items()->findOrFail($itemId);
+        $item->delete();
+
+        return response()->json($carrito->load('items.producto'));
     }
 
-    public function destroy($id)
+    public function clearCarrito(Request $request)
     {
-        Carrito::destroy($id);
-        return response()->json(null, 204);
+        $user = $request->user();
+        $carrito = Carrito::firstOrCreate(['user_id' => $user->id]);
+
+        $carrito->items()->delete();
+
+        return response()->json($carrito->load('items.producto'));
     }
 }
