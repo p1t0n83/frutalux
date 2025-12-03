@@ -92,7 +92,6 @@ export async function logoutUsuario() {
  */
 export async function getUsuario() {
   const token = getToken();
-
   const res = await fetch(`${API_BASE}/me`, {
     method: "GET",
     headers: {

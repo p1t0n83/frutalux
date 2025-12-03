@@ -12,16 +12,12 @@ async function safeJson(res) {
     throw new Error("Respuesta no válida: " + text);
   }
 }
-
 /* ============================
    LISTAR TODOS LOS PRODUCTOS
    ============================ */
 export async function getProductos() {
   const res = await fetch(`${API_BASE}/productos`, {
-    headers: {
-      "Accept": "application/json",
-      Authorization: `Bearer ${getToken()}`
-    }
+    headers: { "Accept": "application/json" }
   });
   const json = await safeJson(res);
   if (!res.ok) throw new Error(json.message || "Error al obtener productos");
@@ -33,12 +29,13 @@ export async function getProductos() {
    ============================ */
 export async function getProducto(id) {
   const res = await fetch(`${API_BASE}/productos/${id}`, {
-    headers: { "Accept": "application/json", Authorization: `Bearer ${getToken()}` }
+    headers: { "Accept": "application/json" }
   });
   const json = await safeJson(res);
   if (!res.ok) throw new Error("Error al obtener producto");
   return json;
 }
+
 
 /* ============================
    CREAR PRODUCTO

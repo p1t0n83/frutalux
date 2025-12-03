@@ -10,7 +10,7 @@ import {
   ChevronLeft,
   ChevronRight,
 } from "lucide-react";
-import { fetchProductoById } from "../services/productosService";
+import { getProducto } from "../services/productoService"; // 👈 import correcto
 import { useCarrito } from "../context/CarritoContext"; 
 import "../styles/DetalleProducto.css";
 
@@ -19,12 +19,12 @@ export default function DetalleProducto() {
   const [producto, setProducto] = useState(null);
   const [cantidad, setCantidad] = useState(1);
   const [currentIndex, setCurrentIndex] = useState(0);
-  const [mensaje, setMensaje] = useState(""); // 👈 estado para mensaje
+  const [mensaje, setMensaje] = useState("");
 
   const { addItem } = useCarrito();
 
   useEffect(() => {
-    fetchProductoById(id)
+    getProducto(id) // 👈 usamos getProducto del nuevo servicio
       .then(setProducto)
       .catch((err) => console.error("Error cargando producto:", err));
   }, [id]);

@@ -1,10 +1,12 @@
+// src/components/AppMenu.jsx
 import React from "react";
 import { Link, useNavigate } from "react-router-dom";
 import "../styles/AppMenu.css";
-import { userAuth } from "../hooks/userAuth";
+import { userAuthContext } from "../context/AuthContext"; // 👈 usa el contexto
 
 export default function AppMenu() {
-  const { isLoggedIn, tipoUsuario, logout } = userAuth();
+  // Consumimos el contexto global en lugar de crear un estado nuevo
+  const { isLoggedIn, tipoUsuario, logout } = userAuthContext();
   const navigate = useNavigate();
 
   const handleLogout = async () => {
@@ -23,7 +25,7 @@ export default function AppMenu() {
           <Link to="/suscripciones" className="menu-link">SUSCRIPCIONES</Link>
           <Link to="/carrito" className="menu-link">CARRITO</Link>
 
-          {isLoggedIn  && (
+          {isLoggedIn && (
             <Link to="/perfil" className="menu-link">MI PERFIL</Link>
           )}
 

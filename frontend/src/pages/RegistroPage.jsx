@@ -1,7 +1,8 @@
+// src/pages/RegistroPage.jsx
 import React, { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { User, Mail, Lock, Phone, MapPin, Home } from "lucide-react";
-import { registrarUsuario } from "../services/authService";
+import { userAuthContext } from "../context/AuthContext"; // 👈 usamos el contexto
 import "../styles/Registro.css";
 
 export default function RegistroPage() {
@@ -21,14 +22,16 @@ export default function RegistroPage() {
   const [error, setError] = useState(null);
   const navigate = useNavigate();
 
+  const { register } = userAuthContext(); // 👈 obtenemos register del contexto
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const res = await registrarUsuario(formData);
-      localStorage.setItem("token", res.access_token); // guardar token
-      navigate("/perfil"); // redirigir tras registro
+      await register(formData); // register ya guarda token y usuario en el contexto
+      navigate("/perfil");      // redirigir tras registro
     } catch (err) {
-      setError(err.message);
+      setError("Error en el registro");
+      console.error("Error registro:", err);
     }
   };
 

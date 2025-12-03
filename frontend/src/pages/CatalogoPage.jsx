@@ -1,7 +1,7 @@
 import React from "react";
 import { Link } from "react-router-dom";
 import { MapPin } from "lucide-react";
-import { fetchProductos } from "../services/productosService";
+import { getProductos } from "../services/productoService"; // 👈 import correcto
 import "../styles/CatalogoPage.css";
 
 export default function CatalogoPage() {
@@ -10,9 +10,11 @@ export default function CatalogoPage() {
   const [selectedCategory, setSelectedCategory] = React.useState("all");
 
   React.useEffect(() => {
-    fetchProductos().then(setProductos).catch((err) => {
-      console.error("Error cargando productos:", err);
-    });
+    getProductos() // 👈 usamos getProductos del nuevo servicio
+      .then(setProductos)
+      .catch((err) => {
+        console.error("Error cargando productos:", err);
+      });
   }, []);
 
   const filteredProducts = productos.filter((p) => {
@@ -76,6 +78,7 @@ export default function CatalogoPage() {
 
             return (
               <Link key={i} to={`/producto/${prod.id}`} className="product-link">
+                {console.log(prod)}
                 <div className="product-card">
                   <div className="product-image">
                     <img

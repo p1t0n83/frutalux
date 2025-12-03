@@ -1,7 +1,8 @@
+// src/pages/LoginPage.jsx
 import React, { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { Mail, Lock } from "lucide-react";
-import { loginUsuario } from "../services/authService";
+import { userAuthContext } from "../context/AuthContext"; // 👈 usamos el contexto
 import "../styles/Registro.css"; // mismo estilo que registro
 
 export default function LoginPage() {
@@ -9,14 +10,16 @@ export default function LoginPage() {
   const [error, setError] = useState(null);
   const navigate = useNavigate();
 
+  const { login } = userAuthContext(); // 👈 obtenemos login del contexto
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const res = await loginUsuario(formData);
-      localStorage.setItem("token", res.access_token); // guardar token
-      navigate("/perfil"); // redirigir tras login
+      await login(formData); // login ya guarda token y usuario en el contexto
+      navigate("/perfil");   // redirigir tras login
     } catch (err) {
-      setError(err.message);
+      setError("Credenciales inválidas");
+      console.error("Error login:", err);
     }
   };
 
@@ -39,7 +42,9 @@ export default function LoginPage() {
               <input
                 type="email"
                 value={formData.email}
-                onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                onChange={(e) =>
+                  setFormData({ ...formData, email: e.target.value })
+                }
                 placeholder="juan@email.com"
                 required
               />
@@ -53,7 +58,9 @@ export default function LoginPage() {
               <input
                 type="password"
                 value={formData.password}
-                onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                onChange={(e) =>
+                  setFormData({ ...formData, password: e.target.value })
+                }
                 placeholder="••••••••"
                 required
               />
