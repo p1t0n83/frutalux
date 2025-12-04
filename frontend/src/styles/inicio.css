@@ -1,49 +1,43 @@
 /* Base container */
 .inicio-container {
   min-height: 100vh;
-  font-family: sans-serif;
+  font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
 }
 
-/* Hero Section */
+/* Hero Section con imagen de fondo */
 .hero-section {
-  background: linear-gradient(to bottom right, #f0fdf4, #dcfce7);
+  background: url("/img/fondo-main.jpg") center/cover no-repeat;
   padding: 5rem 0;
   text-align: center;
+  position: relative;
 }
 
-.logo-box {
-  display: inline-block;
-  border: 4px solid #166534;
-  border-radius: 0.5rem;
-  padding: 1.5rem;
-  background: white;
-  margin-bottom: 2rem;
+/* Overlay opcional para mejorar legibilidad */
+.hero-section::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.4);
+  z-index: 0;
 }
 
-.logo-text {
-  font-size: 3.5rem;
-  font-weight: bold;
-  color: #166534;
-  font-family: serif;
+.hero-content {
+  position: relative;
+  z-index: 1;
 }
 
-.logo-subtext {
-  font-size: 0.875rem;
-  color: #15803d;
-  margin-top: 0.5rem;
-}
-
+/* Hero text */
 .hero-title {
   font-size: 3rem;
   font-weight: bold;
-  color: #1f2937;
+  color: #ffffff;
   margin-bottom: 1.5rem;
 }
 
 .hero-description,
 .hero-subdescription {
   font-size: 1.25rem;
-  color: #374151;
+  color: #f9fafb;
   margin-bottom: 1rem;
   max-width: 40rem;
   margin-left: auto;
@@ -58,31 +52,39 @@
   margin-top: 2rem;
 }
 
+/* Botones */
 .btn-primary,
 .btn-secondary {
-  display: flex;
+  display: inline-flex;
   align-items: center;
-  gap: 0.5rem;
+  justify-content: center;
+  gap: 0.75rem;
   padding: 1rem 2.5rem;
-  font-size: 1.125rem;
+  font-size: 1rem;
   font-weight: 600;
   border-radius: 0.5rem;
   box-shadow: 0 4px 6px rgba(0,0,0,0.1);
   transition: all 0.3s ease;
+  line-height: 1;
+  min-width: 220px;   /* 👈 más ancho */
+  height: 52px;       /* 👈 más alto */
+  box-sizing: border-box;
 }
 
 .btn-primary {
   background-color: #166534;
-  color: white;
+  color: #fff;
+  border: 2px solid #166534;
 }
 
 .btn-primary:hover {
   background-color: #14532d;
+  border-color: #14532d;
   box-shadow: 0 6px 12px rgba(0,0,0,0.2);
 }
 
 .btn-secondary {
-  background-color: white;
+  background-color: #fff;
   color: #166534;
   border: 2px solid #166534;
 }
@@ -92,21 +94,34 @@
   box-shadow: 0 6px 12px rgba(0,0,0,0.2);
 }
 
+/* Iconos dentro de los botones */
 .icon {
-  width: 1.25rem;
-  height: 1.25rem;
+  width: 22px;
+  height: 22px;
+  flex-shrink: 0;
+}
+
+.btn-primary .icon {
+  color: #ffffff;   /* cesta blanca */
+}
+
+.btn-secondary .icon {
+  color: #166534;   /* corazón verde */
 }
 
 /* Features Section */
 .features-section {
-  background: white;
+  background-color: #f3f4f6;
   padding: 4rem 0;
 }
 
 .features-grid {
   display: grid;
   grid-template-columns: 1fr;
-  gap: 2rem;
+  gap: 2.5rem;
+  max-width: 1400px;   /* 👈 más ancho */
+  margin: 0 auto;
+  padding: 0 3rem;     /* 👈 más margen lateral */
 }
 
 @media (min-width: 768px) {
@@ -117,9 +132,10 @@
 
 .feature-card {
   text-align: center;
-  padding: 2rem;
+  padding: 3rem;       /* 👈 más padding interno */
   border: 2px solid #bbf7d0;
   border-radius: 1rem;
+  background-color: #ffffff;
   transition: all 0.3s ease;
 }
 
@@ -129,8 +145,8 @@
 }
 
 .feature-icon {
-  width: 5rem;
-  height: 5rem;
+  width: 7rem;         /* 👈 icono más grande */
+  height: 7rem;
   margin: 0 auto 1.5rem;
   background-color: #dcfce7;
   border-radius: 50%;
@@ -140,13 +156,14 @@
 }
 
 .feature-title {
-  font-size: 1.5rem;
+  font-size: 1.8rem;   /* 👈 título más grande */
   font-weight: bold;
   color: #1f2937;
   margin-bottom: 1rem;
 }
 
 .feature-description {
+  font-size: 1.2rem;   /* 👈 texto más grande */
   color: #4b5563;
 }
 
@@ -202,8 +219,8 @@
 .btn-cta {
   background-color: white;
   color: #166534;
-  padding: 1rem 3rem;
-  font-size: 1.125rem;
+  padding: 1rem 3.5rem;  /* 👈 más ancho */
+  font-size: 1.25rem;    /* 👈 más grande */
   font-weight: bold;
   border-radius: 0.5rem;
   box-shadow: 0 6px 12px rgba(0,0,0,0.2);

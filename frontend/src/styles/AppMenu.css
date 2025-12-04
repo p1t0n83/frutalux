@@ -21,6 +21,12 @@
   text-decoration: none;
 }
 
+.logo-img {
+  height: 80px; /* ajusta según tu diseño */
+  width: auto;
+  display: block;
+}
+
 .menu-desktop {
   display: flex;
   gap: 1rem;
@@ -60,3 +66,24 @@
   background-color: #14532d;
 }
 
+/* Carrito link */
+.carrito-link {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem; /* 👈 separa el texto del badge */
+}
+
+/* Badge contador */
+.cart-count {
+  background-color: #ffffff;   /* 👈 fondo blanco */
+  color: #166534;              /* texto verde para contraste */
+  font-size: 0.75rem;
+  font-weight: bold;
+  border-radius: 50%;
+  padding: 0.25rem 0.6rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.15); /* 👈 sombra ligera */
+}

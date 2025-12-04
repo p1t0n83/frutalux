@@ -6,12 +6,30 @@
 }
 
 /* Hero Section */
+
 .agricultores-hero {
-  background: #064e3b;
+  background: url("/img/fondo-main.jpg") center/cover no-repeat; /* 👈 misma foto de fondo */
   color: white;
   padding: 5rem 2rem;
   text-align: center;
+  position: relative;
 }
+
+/* Overlay opcional para mejorar legibilidad */
+.agricultores-hero::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.4); /* oscurece el fondo para que el texto se lea */
+  z-index: 0;
+}
+
+.agricultores-hero .agricultores-title,
+.agricultores-hero .agricultores-subtitle {
+  position: relative;
+  z-index: 1; /* asegura que el texto esté encima del overlay */
+}
+
 
 .agricultores-title {
   font-size: 3rem;

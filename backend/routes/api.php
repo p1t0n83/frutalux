@@ -98,8 +98,8 @@ Route::middleware('auth:sanctum')->group(function () {
 
     /*
     |--------------------------------------------------------------------------
-    | Facturas (generar PDF y guardar)
+    | Facturas (requieren login)
     |--------------------------------------------------------------------------
     */
-    Route::post('facturas', [FacturaController::class, 'generar']);
+    Route::post('facturas/generar', [FacturaController::class, 'generar']);
 });

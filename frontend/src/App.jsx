@@ -67,6 +67,15 @@ export default function App() {
                 }
               />
 
+              <Route
+                path="/checkout-suscripcion"
+                element={
+                  <PrivateRoute>
+                    <Checkout /> {/* 👈 nueva ruta checkout */}
+                  </PrivateRoute>
+                }
+              />
+
               {/* Bloqueadas: solo administradores */}
               <Route
                 path="/admin"

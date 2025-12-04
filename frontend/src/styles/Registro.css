@@ -1,3 +1,5 @@
+/* src/styles/Registro.css */
+
 /* CONTENEDOR PRINCIPAL */
 .registro-container {
   min-height: 100vh;
@@ -72,6 +74,7 @@
 .form-group {
   display: flex;
   flex-direction: column;
+  gap: 0.25rem;
 }
 
 /* ETIQUETAS */
@@ -79,30 +82,47 @@
   font-size: 0.875rem;
   font-weight: 600;
   color: #374151;
+  display: block;
   margin-bottom: 0.25rem;
 }
 
-/* CAMPOS CON ICONO */
-.input-icon {
+/* ===== CAMPOS CON ICONO - SOLUCIÓN DEFINITIVA ===== */
+.registro-form .input-icon {
   position: relative;
+  display: block;
+  width: 100%;
 }
 
-.input-icon .icon {
+.registro-form .input-icon .icon {
   position: absolute;
-  left: 0.75rem;
+  left: 12px;
   top: 50%;
   transform: translateY(-50%);
-  width: 1.25rem;
-  height: 1.25rem;
+  width: 20px;
+  height: 20px;
   color: #9ca3af;
+  pointer-events: none !important;
+  user-select: none;
+  z-index: 2;
 }
 
-.input-icon input {
-  padding-left: 2.5rem;
+.registro-form .input-icon input {
+  width: 100% !important;
+  padding: 0.75rem !important;
+  padding-left: 2.75rem !important;
+  border: 2px solid #d1d5db !important;
+  border-radius: 0.5rem !important;
+  font-size: 0.95rem !important;
+  transition: border-color 0.2s;
+  box-sizing: border-box !important;
+  background: white;
+  color: #111827;
+  line-height: 1.5;
+  display: block;
 }
 
-/* INPUTS GENERALES */
-input {
+/* Inputs SIN icono (por si acaso) */
+.registro-form .form-group > input {
   width: 100%;
   padding: 0.75rem;
   border: 2px solid #d1d5db;
@@ -110,11 +130,15 @@ input {
   font-size: 0.95rem;
   transition: border-color 0.2s;
   box-sizing: border-box;
+  background: white;
+  color: #111827;
 }
 
-input:focus {
-  outline: none;
-  border-color: #166534;
+/* Focus para TODOS los inputs */
+.registro-form input:focus {
+  outline: none !important;
+  border-color: #166534 !important;
+  box-shadow: 0 0 0 3px rgba(22, 101, 52, 0.1);
 }
 
 /* BOTÓN DE ENVÍO */
@@ -123,14 +147,23 @@ input:focus {
   background: #166534;
   color: white;
   padding: 0.75rem;
+  border: none;
   border-radius: 0.75rem;
   font-weight: 600;
-  transition: background 0.2s;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: all 0.2s;
   margin-top: 1rem;
 }
 
 .btn-submit:hover {
   background: #14532d;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(22, 101, 52, 0.3);
+}
+
+.btn-submit:active {
+  transform: translateY(0);
 }
 
 /* LINK DE LOGIN */
@@ -149,4 +182,24 @@ input:focus {
 
 .login-link a:hover {
   color: #14532d;
+  text-decoration: underline;
+}
+
+/* RESPONSIVE */
+@media (max-width: 768px) {
+  .registro-card {
+    padding: 1.5rem;
+  }
+
+  .form-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .registro-header h1 {
+    font-size: 1.5rem;
+  }
+  
+  .registro-header .logo {
+    font-size: 1.75rem;
+  }
 }

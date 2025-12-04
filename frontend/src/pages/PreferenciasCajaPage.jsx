@@ -1,9 +1,11 @@
+// src/pages/PreferenciasCaja.jsx
 import React, { useState } from "react";
-import { Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { Package, Calendar, Check } from "lucide-react";
 import "../styles/PreferenciasCaja.css";
 
 export default function PreferenciasCaja() {
+  const navigate = useNavigate();
   const [tamano, setTamano] = useState("mediana");
   const [frecuencia, setFrecuencia] = useState("quincenal");
   const [preferencias, setPreferencias] = useState({
@@ -12,6 +14,21 @@ export default function PreferenciasCaja() {
     citricos: true,
     hortalizas: true
   });
+
+  const handleConfirmar = () => {
+    // Guardar preferencias en sessionStorage
+    const datosSuscripcion = {
+      tamano,
+      frecuencia,
+      preferencias,
+      tipo: "suscripcion"
+    };
+    
+    sessionStorage.setItem("suscripcionData", JSON.stringify(datosSuscripcion));
+    
+    // Redirigir a checkout con tipo suscripcion
+    navigate("/checkout-suscripcion");
+  };
 
   return (
     <div className="preferencias-container">
@@ -127,10 +144,10 @@ export default function PreferenciasCaja() {
 
         {/* Botones */}
         <div className="preferencias-buttons">
-          <Link to="/suscripciones" className="flex-1">
-            <button className="btn-cancel">CANCELAR</button>
-          </Link>
-          <button className="btn-confirm">
+          <button className="btn-cancel" onClick={() => navigate("/suscripciones")}>
+            CANCELAR
+          </button>
+          <button className="btn-confirm" onClick={handleConfirmar}>
             <Check className="icon-small" />
             CONFIRMAR SUSCRIPCIÓN
           </button>

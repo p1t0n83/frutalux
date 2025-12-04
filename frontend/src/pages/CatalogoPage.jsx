@@ -78,7 +78,7 @@ export default function CatalogoPage() {
 
             return (
               <Link key={i} to={`/producto/${prod.id}`} className="product-link">
-                {console.log(prod)}
+               
                 <div className="product-card">
                   <div className="product-image">
                     <img

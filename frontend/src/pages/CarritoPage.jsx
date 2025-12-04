@@ -1,35 +1,19 @@
-import React, { useState, useEffect } from "react";
+import React from "react";
 import { Link } from "react-router-dom";
 import { Trash2, ShoppingBag, ArrowRight } from "lucide-react";
 import "../styles/Carrito.css";
-import { getCarrito, updateItem, removeItem, clearCarrito } from "../services/carritoService";
-import { userAuthContext } from "../context/AuthContext"; // 👈 usa el hook correcto
+import { useCarrito } from "../context/CarritoContext"; // 👈 USAR EL CONTEXTO
 
 export default function CarritoPage() {
-  const [items, setItems] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const { user } = userAuthContext(); // 👈 obtenemos el usuario logueado
+  // 👇 Obtener todo del contexto en lugar de estado local
+  const { carrito, loading, updateItem: updateItemContext, removeItem: removeItemContext, clear } = useCarrito();
 
-  useEffect(() => {
-    const fetchData = async () => {
-      if (!user) return; // 👈 si no hay usuario, no pedimos nada
-      try {
-        const data = await getCarrito(); // 👈 ya no pasamos user.id
-        setItems(data.items || []);
-      } catch (err) {
-        console.error(err);
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchData();
-  }, [user]);
+  const items = carrito?.items || [];
 
   const updateCantidad = async (itemId, newCantidad) => {
-    if (newCantidad >= 0.5 && user) {
+    if (newCantidad >= 0.5) {
       try {
-        const actualizado = await updateItem(itemId, newCantidad);
-        setItems(actualizado.items || []);
+        await updateItemContext(itemId, newCantidad);
       } catch (err) {
         console.error(err);
       }
@@ -37,24 +21,20 @@ export default function CarritoPage() {
   };
 
   const removeItemFromCarrito = async (itemId) => {
-    if (user) {
-      try {
-        const actualizado = await removeItem(itemId);
-        setItems(actualizado.items || []);
-      } catch (err) {
-        console.error(err);
-      }
+    try {
+      console.log("🗑️ Eliminando item:", itemId);
+      await removeItemContext(itemId);
+      console.log("✅ Item eliminado");
+    } catch (err) {
+      console.error("❌ Error al eliminar:", err);
     }
   };
 
   const vaciarCarrito = async () => {
-    if (user) {
-      try {
-        const actualizado = await clearCarrito();
-        setItems(actualizado.items || []);
-      } catch (err) {
-        console.error(err);
-      }
+    try {
+      await clear();
+    } catch (err) {
+      console.error(err);
     }
   };
 

@@ -1,8 +1,8 @@
 // src/pages/RegistroPage.jsx
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { User, Mail, Lock, Phone, MapPin, Home } from "lucide-react";
-import { userAuthContext } from "../context/AuthContext"; // 👈 usamos el contexto
+import { userAuthContext } from "../context/AuthContext";
 import "../styles/Registro.css";
 
 export default function RegistroPage() {
@@ -22,18 +22,30 @@ export default function RegistroPage() {
   const [error, setError] = useState(null);
   const navigate = useNavigate();
 
-  const { register } = userAuthContext(); // 👈 obtenemos register del contexto
+  const { register, isLoggedIn } = userAuthContext(); // 👈 obtenemos isLoggedIn
+
+  // 👇 Redirigir si ya está logueado
+  useEffect(() => {
+    if (isLoggedIn) {
+      navigate("/perfil");
+    }
+  }, [isLoggedIn, navigate]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      await register(formData); // register ya guarda token y usuario en el contexto
-      navigate("/perfil");      // redirigir tras registro
+      await register(formData);
+      navigate("/perfil");
     } catch (err) {
       setError("Error en el registro");
       console.error("Error registro:", err);
     }
   };
+
+  // 👇 No renderizar el formulario si ya está logueado
+  if (isLoggedIn) {
+    return null;
+  }
 
   return (
     <div className="registro-container">
@@ -63,13 +75,16 @@ export default function RegistroPage() {
             </div>
             <div className="form-group">
               <label>Apellidos</label>
-              <input
-                type="text"
-                value={formData.apellidos}
-                onChange={(e) => setFormData({ ...formData, apellidos: e.target.value })}
-                placeholder="García López"
-                required
-              />
+              <div className="input-icon">
+                <User className="icon" />
+                <input
+                  type="text"
+                  value={formData.apellidos}
+                  onChange={(e) => setFormData({ ...formData, apellidos: e.target.value })}
+                  placeholder="García López"
+                  required
+                />
+              </div>
             </div>
           </div>
 
@@ -103,13 +118,16 @@ export default function RegistroPage() {
 
           <div className="form-group">
             <label>Confirmar Contraseña</label>
-            <input
-              type="password"
-              value={formData.password_confirmation}
-              onChange={(e) => setFormData({ ...formData, password_confirmation: e.target.value })}
-              placeholder="••••••••"
-              required
-            />
+            <div className="input-icon">
+              <Lock className="icon" />
+              <input
+                type="password"
+                value={formData.password_confirmation}
+                onChange={(e) => setFormData({ ...formData, password_confirmation: e.target.value })}
+                placeholder="••••••••"
+                required
+              />
+            </div>
           </div>
 
           <div className="form-group">
@@ -153,23 +171,29 @@ export default function RegistroPage() {
             </div>
             <div className="form-group">
               <label>Código Postal</label>
-              <input
-                type="text"
-                value={formData.codigo_postal}
-                onChange={(e) => setFormData({ ...formData, codigo_postal: e.target.value })}
-                placeholder="46001"
-              />
+              <div className="input-icon">
+                <MapPin className="icon" />
+                <input
+                  type="text"
+                  value={formData.codigo_postal}
+                  onChange={(e) => setFormData({ ...formData, codigo_postal: e.target.value })}
+                  placeholder="46001"
+                />
+              </div>
             </div>
           </div>
 
           <div className="form-group">
             <label>Provincia</label>
-            <input
-              type="text"
-              value={formData.provincia}
-              onChange={(e) => setFormData({ ...formData, provincia: e.target.value })}
-              placeholder="Valencia"
-            />
+            <div className="input-icon">
+              <MapPin className="icon" />
+              <input
+                type="text"
+                value={formData.provincia}
+                onChange={(e) => setFormData({ ...formData, provincia: e.target.value })}
+                placeholder="Valencia"
+              />
+            </div>
           </div>
 
           <button type="submit" className="btn-submit">REGISTRARSE</button>

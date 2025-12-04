@@ -1,4 +1,5 @@
-const API_BASE = "http://localhost:8000/api";
+// src/services/pedidoService.js
+const API_BASE = import.meta.env.VITE_API_URL || "http://localhost:8000/api";
 
 function getToken() {
   return localStorage.getItem("token");
@@ -17,7 +18,7 @@ async function safeJson(res) {
    LISTAR TODOS LOS PEDIDOS
    ============================ */
 export async function getPedidos() {
-  const res = await fetch(`${API_BASE}/pedidos`, {
+  const res = await fetch(`${API_BASE}/pedidos`, {  // 👈 FIX: Paréntesis
     headers: {
       Accept: "application/json",
       Authorization: `Bearer ${getToken()}`,
@@ -32,7 +33,7 @@ export async function getPedidos() {
    OBTENER DETALLE DE UN PEDIDO
    ============================ */
 export async function getPedidoById(id) {
-  const res = await fetch(`${API_BASE}/pedidos/${id}`, {
+  const res = await fetch(`${API_BASE}/pedidos/${id}`, {  // 👈 FIX: Paréntesis
     headers: {
       Accept: "application/json",
       Authorization: `Bearer ${getToken()}`,

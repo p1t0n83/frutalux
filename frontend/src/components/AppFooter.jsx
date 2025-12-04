@@ -15,7 +15,7 @@ export default function AppFooter() {
           <h4>Navegación</h4>
           <Link to={createPageUrl("Catalogo")}>Catálogo</Link>
           <Link to={createPageUrl("Suscripciones")}>Suscripciones</Link>
-          <Link to={createPageUrl("PerfilCliente")}>Mi Perfil</Link>
+          <Link to={createPageUrl("Perfil")}>Mi Perfil</Link>
         </div>
         <div>
           <h4>Información</h4>

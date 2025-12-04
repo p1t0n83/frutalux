@@ -21,6 +21,11 @@ return new class extends Migration
             $table->text('notas')->nullable(); // 👈 nuevo campo
             $table->date('fecha_entrega_estimada')->nullable(); // 👈 nuevo campo
             $table->date('fecha_entrega_real')->nullable(); // opcional, útil para trazabilidad
+            $table->string('metodo_pago')->nullable(); // 'tarjeta', 'transferencia', 'reembolso'
+            $table->string('factura_numero')->nullable(); // Número de factura
+            $table->string('factura_url')->nullable(); // URL de la factura PDF
+            $table->string('cliente_email')->nullable(); // Email del cliente
+            $table->string('cliente_nombre')->nullable(); // Nombre del cliente
             $table->timestamps();
         });
     }
