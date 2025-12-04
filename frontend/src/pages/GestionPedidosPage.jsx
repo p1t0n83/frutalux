@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
-import { Link, useNavigate } from "react-router-dom";
-import { Search, Eye, Edit } from "lucide-react";
+import { Link } from "react-router-dom";
+import { Search, Eye, CreditCard } from "lucide-react";
 import { getPedidos } from "../services/pedidoService";
 import "../styles/GestionPedidos.css";
 
@@ -10,14 +10,30 @@ export default function GestionPedidosPage() {
   const [pedidos, setPedidos] = useState([]);
   const [error, setError] = useState(null);
 
-  const navigate = useNavigate();
-
   useEffect(() => {
     const cargarPedidos = async () => {
       try {
         const data = await getPedidos();
-        setPedidos(data);
+        console.log("Respuesta pedidos:", data);
+
+        const pedidosNormalizados = (data.data || data.pedidos || data || []).map(p => ({
+          id: p.id,
+          numero: p.numero || p.numero_pedido,
+          cliente: p.cliente || p.cliente_nombre || "Sin nombre",
+          estado: p.estado === "pagado" ? "Pagado" : p.estado,
+          fecha: new Date(p.created_at).toLocaleDateString("es-ES", {
+            day: "2-digit",
+            month: "2-digit",
+            year: "numeric",
+          }),
+          tipo: p.tipo || p.tipo_pedido,
+          total: p.total,
+          factura_url: p.factura_url,
+        }));
+
+        setPedidos(pedidosNormalizados);
       } catch (err) {
+        console.error("Error al cargar pedidos:", err);
         setError("Error al cargar pedidos");
       }
     };
@@ -62,6 +78,7 @@ export default function GestionPedidosPage() {
             <option value="Preparando">Preparando</option>
             <option value="Enviado">Enviado</option>
             <option value="Entregado">Entregado</option>
+            <option value="Pagado">Pagado</option>
           </select>
         </div>
 
@@ -108,6 +125,8 @@ export default function GestionPedidosPage() {
                             ? "estado-preparando"
                             : pedido.estado === "Confirmado"
                             ? "estado-confirmado"
+                            : pedido.estado === "Pagado"
+                            ? "estado-pagado"
                             : "estado-pendiente"
                         }`}
                       >
@@ -116,17 +135,21 @@ export default function GestionPedidosPage() {
                     </td>
                     <td>
                       <div className="acciones">
+                        {/* Ver detalle */}
                         <Link to={`/admin/pedidos/${pedido.id}`}>
                           <button className="btn-ver">
                             <Eye className="w-5 h-5" />
                           </button>
                         </Link>
-                        <button
-                          className="btn-editar"
-                          onClick={() => navigate(`/admin/pedidos/${pedido.id}/editar`)}
-                        >
-                          <Edit className="w-5 h-5" />
-                        </button>
+                        {/* Ver factura */}
+                        {pedido.factura_url && (
+                          <button
+                            className="btn-factura"
+                            onClick={() => window.open(pedido.factura_url, "_blank")}
+                          >
+                            <CreditCard className="w-5 h-5" />
+                          </button>
+                        )}
                       </div>
                     </td>
                   </tr>

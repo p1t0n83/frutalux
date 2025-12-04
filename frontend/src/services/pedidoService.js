@@ -15,10 +15,10 @@ async function safeJson(res) {
 }
 
 /* ============================
-   LISTAR TODOS LOS PEDIDOS
+   LISTAR TODOS LOS PEDIDOS (admin)
    ============================ */
 export async function getPedidos() {
-  const res = await fetch(`${API_BASE}/pedidos`, {  // 👈 FIX: Paréntesis
+  const res = await fetch(`${API_BASE}/pedidos`, {
     headers: {
       Accept: "application/json",
       Authorization: `Bearer ${getToken()}`,
@@ -33,7 +33,7 @@ export async function getPedidos() {
    OBTENER DETALLE DE UN PEDIDO
    ============================ */
 export async function getPedidoById(id) {
-  const res = await fetch(`${API_BASE}/pedidos/${id}`, {  // 👈 FIX: Paréntesis
+  const res = await fetch(`${API_BASE}/pedidos/${id}`, {
     headers: {
       Accept: "application/json",
       Authorization: `Bearer ${getToken()}`,
@@ -41,5 +41,20 @@ export async function getPedidoById(id) {
   });
   const json = await safeJson(res);
   if (!res.ok) throw new Error(json.message || "Error al obtener pedido");
+  return json;
+}
+
+/* ============================
+   LISTAR SOLO LOS PEDIDOS DEL CLIENTE
+   ============================ */
+export async function getMisPedidos() {
+  const res = await fetch(`${API_BASE}/mis-pedidos`, {
+    headers: {
+      Accept: "application/json",
+      Authorization: `Bearer ${getToken()}`,
+    },
+  });
+  const json = await safeJson(res);
+  if (!res.ok) throw new Error(json.message || "Error al obtener mis pedidos");
   return json;
 }

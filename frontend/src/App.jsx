@@ -9,7 +9,7 @@ import Agricultores from "./pages/AgricultoresPage";
 import Suscripciones from "./pages/SuscripcionesPage";
 import PreferenciasCaja from "./pages/PreferenciasCajaPage";
 import Carrito from "./pages/CarritoPage";
-import Checkout from "./pages/Checkout"; // 👈 importamos checkout
+import Checkout from "./pages/Checkout";
 import RegistroPage from "./pages/RegistroPage";
 import LoginPage from "./pages/LoginPage";
 import PerfilClientePage from "./pages/PerfilClientePage";
@@ -19,6 +19,7 @@ import DetalleUsuarioAdmin from "./pages/DetalleUsuarioAdminPage";
 import GestionProductosPage from "./pages/GestionProductosPage";
 import DetalleProductoAdmin from "./pages/DetalleProductoAdminPage";
 import GestionPedidosPage from "./pages/GestionPedidosPage";
+import DetallePedidoAdminPage from "./pages/DetallePedidoAdminPage"; // 👈 nuevo
 import PrivateRoute from "./components/PrivateRoute";
 
 // Providers
@@ -32,6 +33,7 @@ export default function App() {
         <Router>
           <Routes>
             <Route element={<AppLayout />}>
+              {/* Públicas */}
               <Route path="/" element={<InicioPage />} />
               <Route path="/catalogo" element={<CatalogoPage />} />
               <Route path="/producto/:id" element={<DetalleProducto />} />
@@ -62,16 +64,15 @@ export default function App() {
                 path="/checkout"
                 element={
                   <PrivateRoute>
-                    <Checkout /> {/* 👈 nueva ruta checkout */}
+                    <Checkout />
                   </PrivateRoute>
                 }
               />
-
               <Route
                 path="/checkout-suscripcion"
                 element={
                   <PrivateRoute>
-                    <Checkout /> {/* 👈 nueva ruta checkout */}
+                    <Checkout />
                   </PrivateRoute>
                 }
               />
@@ -138,6 +139,14 @@ export default function App() {
                 element={
                   <PrivateRoute allowedRoles={["administrador"]}>
                     <GestionPedidosPage />
+                  </PrivateRoute>
+                }
+              />
+              <Route
+                path="/admin/pedidos/:id"
+                element={
+                  <PrivateRoute allowedRoles={["administrador"]}>
+                    <DetallePedidoAdminPage />
                   </PrivateRoute>
                 }
               />

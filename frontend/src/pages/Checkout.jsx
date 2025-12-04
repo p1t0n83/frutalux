@@ -3,12 +3,14 @@ import React, { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { CreditCard, Truck, CheckCircle, AlertCircle } from "lucide-react";
 import { generarFactura } from "../services/facturaService";
-import { getCarrito, clearCarrito } from "../services/carritoService";
+import { getCarrito } from "../services/carritoService";
+import { useCarrito } from "../context/CarritoContext"; // 👈 IMPORTAR EL CONTEXTO
 import "../styles/Checkout.css";
 
 export default function Checkout({ tipo = "pedido" }) {
   const navigate = useNavigate();
   const location = useLocation();
+  const { clear } = useCarrito(); // 👈 OBTENER clear del contexto
   const [metodoPago, setMetodoPago] = useState("tarjeta");
   const [mensaje, setMensaje] = useState("");
   const [productos, setProductos] = useState([]);
@@ -16,7 +18,7 @@ export default function Checkout({ tipo = "pedido" }) {
   const [gastosEnvio, setGastosEnvio] = useState(3.50);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
-  
+  const [verFactura, setVerFactura] = useState(false);
   // Datos del cliente
   const [cliente, setCliente] = useState({
     nombre: "",
@@ -63,19 +65,17 @@ export default function Checkout({ tipo = "pedido" }) {
           let precioFinal = precioBase;
           let descuento = 0;
 
-          // CORRECCIÓN: Aplicar los descuentos correctos según la frecuencia
           if (data.frecuencia === "semanal") {
-            descuento = 5; // 5% descuento para entrega semanal
+            descuento = 5;
             precioFinal = precioBase * 0.95;
           } else if (data.frecuencia === "quincenal") {
-            descuento = 3; // 3% descuento para entrega quincenal (NO 5%)
+            descuento = 3;
             precioFinal = precioBase * 0.97;
           } else if (data.frecuencia === "mensual") {
-            descuento = 5; // 5% descuento para entrega mensual (NO 10%)
+            descuento = 5;
             precioFinal = precioBase * 0.95;
           }
 
-          // El nombre del producto también debería reflejar la frecuencia correctamente
           const nombreCaja = `Caja ${data.tamano.charAt(0).toUpperCase() + data.tamano.slice(1)} - Entrega ${data.frecuencia}`;
 
           // Crear producto de suscripción
@@ -94,12 +94,12 @@ export default function Checkout({ tipo = "pedido" }) {
           ];
           
           setProductos(productosSuscripcion);
-          setSubtotal(precioFinal); // Solo el precio de UNA caja
+          setSubtotal(precioFinal);
           setLoading(false);
           return;
         }
 
-        // Si es pedido normal, cargar carrito (puede tener múltiples productos)
+        // Si es pedido normal, cargar carrito
         const data = await getCarrito();
         const items = data.items || [];
         
@@ -112,7 +112,7 @@ export default function Checkout({ tipo = "pedido" }) {
 
         setProductos(items);
 
-        // Calcular subtotal multiplicando precio * cantidad para productos normales
+        // Calcular subtotal
         const sub = items.reduce((acc, item) => {
           const precio = parseFloat(item.precio_unitario) || 0;
           const cantidad = parseFloat(item.cantidad_kg) || 0;
@@ -168,8 +168,6 @@ export default function Checkout({ tipo = "pedido" }) {
         const tipoFactura = tipo === "suscripcion" || location.pathname === "/checkout-suscripcion" 
             ? "suscripcion" 
             : "pedido";
-        
-       
 
         const factura = await generarFactura({
             tipo: tipoFactura,
@@ -187,34 +185,38 @@ export default function Checkout({ tipo = "pedido" }) {
         });
 
         setMensaje("✅ Pedido confirmado con éxito. Factura generada.");
+         if (verFactura && factura.url) {
         window.open(factura.url, "_blank");
+         }
 
-        // NUEVA FUNCIONALIDAD: Redirigir al inicio y vaciar carrito si es pedido
-        setTimeout(() => {
+        // LIMPIAR CARRITO Y ACTUALIZAR CONTEXTO
+        setTimeout(async () => {
             setMensaje("");
             
-            // Limpiar sessionStorage si es suscripción
             if (tipoFactura === "suscripcion") {
+                // Limpiar sessionStorage si es suscripción
                 sessionStorage.removeItem("suscripcionData");
+                navigate("/");
             } else {
-                // Si es pedido normal, vaciar el carrito
+                // Si es pedido normal, vaciar el carrito usando la función del contexto
                 try {
-                    // Intentar vaciar carrito a través del servicio
-                    clearCarrito();
+                    console.log("🧹 Vaciando carrito después de confirmar pedido...");
                     
-                    // También limpiar localStorage/sessionStorage como respaldo
-                    localStorage.removeItem("carrito");
-                    localStorage.removeItem("cartItems");
-                    sessionStorage.removeItem("carrito");
-                    sessionStorage.removeItem("cartItems");
+                    // ✅ Usar clear() del contexto (la misma que el botón "Vaciar carrito")
+                    // Esta función actualiza automáticamente el backend Y el contexto
+                    await clear();
+                    
+                    console.log("✅ Carrito vaciado completamente");
+                    
+                    // Redirigir al inicio SIN recargar página
+                    navigate("/");
+                    
                 } catch (error) {
-                    console.warn("No se pudo vaciar el carrito automáticamente:", error);
-                    // El pedido ya se completó, solo mostramos advertencia
+                    console.error("⚠️ Error al vaciar el carrito:", error);
+                    // Si falla, redirigir de todas formas
+                    navigate("/");
                 }
             }
-            
-            // REDIRECCIÓN: Siempre al inicio (home)
-            navigate("/");
         }, 3000);
 
     } catch (err) {
@@ -222,7 +224,7 @@ export default function Checkout({ tipo = "pedido" }) {
         setMensaje(`❌ Error: ${err.message}`);
         setTimeout(() => setMensaje(""), 6000);
     }
-};
+  };
 
   if (loading) {
     return (
@@ -380,13 +382,11 @@ export default function Checkout({ tipo = "pedido" }) {
                   <div key={i} className="summary-item">
                     <div>
                       <p>{prod.producto?.nombre}</p>
-                      {/* Si es caja de suscripción, mostrar kg de la caja */}
                       {prod.esCaja && prod.kg_caja ? (
                         <small>{prod.kg_caja} kg por caja</small>
                       ) : (
                         <small>{prod.cantidad_kg} kg</small>
                       )}
-                      {/* Mostrar precio original tachado si hay descuento */}
                       {prod.descuento > 0 && (
                         <div style={{ fontSize: "11px", color: "#4caf50", marginTop: "2px" }}>
                           <span style={{ textDecoration: "line-through", color: "#999", marginRight: "5px" }}>
@@ -409,6 +409,14 @@ export default function Checkout({ tipo = "pedido" }) {
                 <span>€{total.toFixed(2)}</span>
               </div>
             </div>
+            <label style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+              <input
+                type="checkbox"
+                checked={verFactura}
+                onChange={(e) => setVerFactura(e.target.checked)}
+              />
+              Ver factura al finalizar
+            </label>
             <button className="btn-confirmar" onClick={handleConfirmar}>
               <CheckCircle className="icon" /> 
               {esSuscripcion ? "CONFIRMAR SUSCRIPCIÓN" : "CONFIRMAR PEDIDO"}

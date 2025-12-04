@@ -59,6 +59,8 @@ Route::middleware('auth:sanctum')->group(function () {
     // Pedidos
     Route::apiResource('pedidos', PedidoController::class)
         ->parameters(['pedidos' => 'pedido']);
+    
+    Route::get('mis-pedidos', [PedidoController::class, 'misPedidos']);
 
     /*
     |--------------------------------------------------------------------------
