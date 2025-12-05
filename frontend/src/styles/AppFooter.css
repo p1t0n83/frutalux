@@ -1,20 +1,69 @@
 .footer {
   background-color: #1f2937;
   color: white;
-  padding: 3rem 1.5rem;
+  padding: 2rem 1rem;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+@media (min-width: 768px) {
+  .footer {
+    padding: 3rem 1.5rem;
+  }
 }
 
 .footer-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  grid-template-columns: 1fr;
   gap: 2rem;
+  max-width: 1200px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+@media (min-width: 640px) {
+  .footer-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (min-width: 1024px) {
+  .footer-grid {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+.footer-section {
+  width: 100%;
 }
 
 .footer-logo {
-  font-size: 1.5rem;
+  font-size: 1.25rem;
   font-weight: bold;
   font-family: serif;
-  margin-bottom: 1rem;
+  margin-bottom: 0.75rem;
+  line-height: 1.3;
+}
+
+@media (min-width: 768px) {
+  .footer-logo {
+    font-size: 1.5rem;
+    margin-bottom: 1rem;
+  }
+}
+
+.footer-section h3 {
+  font-size: 1rem;
+  font-weight: 600;
+  margin-bottom: 0.75rem;
+  color: white;
+}
+
+@media (min-width: 768px) {
+  .footer-section h3 {
+    font-size: 1.125rem;
+    margin-bottom: 1rem;
+  }
 }
 
 .footer a {
@@ -22,10 +71,33 @@
   margin-bottom: 0.5rem;
   color: #d1d5db;
   text-decoration: none;
+  font-size: 0.875rem;
+  transition: color 0.2s;
+  line-height: 1.5;
+}
+
+@media (min-width: 768px) {
+  .footer a {
+    font-size: 0.9375rem;
+  }
 }
 
 .footer a:hover {
   color: white;
+  text-decoration: underline;
+}
+
+.footer p {
+  color: #d1d5db;
+  font-size: 0.875rem;
+  line-height: 1.6;
+  margin-bottom: 0.5rem;
+}
+
+@media (min-width: 768px) {
+  .footer p {
+    font-size: 0.9375rem;
+  }
 }
 
 .footer-bottom {
@@ -33,6 +105,59 @@
   margin-top: 2rem;
   padding-top: 1rem;
   text-align: center;
-  font-size: 0.875rem;
+  font-size: 0.8125rem;
   color: #9ca3af;
+  max-width: 1200px;
+  margin-left: auto;
+  margin-right: auto;
+  width: 100%;
+}
+
+@media (min-width: 768px) {
+  .footer-bottom {
+    font-size: 0.875rem;
+    padding-top: 1.5rem;
+  }
+}
+
+/* Estilos para redes sociales si las tienes */
+.footer-social {
+  display: flex;
+  gap: 1rem;
+  margin-top: 1rem;
+  flex-wrap: wrap;
+}
+
+.footer-social a {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2rem;
+  height: 2rem;
+  border-radius: 50%;
+  background-color: #374151;
+  transition: all 0.2s;
+}
+
+@media (min-width: 768px) {
+  .footer-social a {
+    width: 2.5rem;
+    height: 2.5rem;
+  }
+}
+
+.footer-social a:hover {
+  background-color: #4b5563;
+  transform: translateY(-2px);
+}
+
+/* Lista de enlaces en columna */
+.footer-links {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.footer-links li {
+  margin-bottom: 0.5rem;
 }

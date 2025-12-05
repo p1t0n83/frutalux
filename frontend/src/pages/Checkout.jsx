@@ -36,7 +36,7 @@ export default function Checkout({ tipo = "pedido" }) {
         // Si es suscripción, cargar datos de sessionStorage
         if (tipo === "suscripcion" || location.pathname === "/checkout-suscripcion") {
           const suscripcionData = sessionStorage.getItem("suscripcionData");
-          
+
           if (!suscripcionData) {
             setError("No hay datos de suscripción. Por favor, configura tu caja primero.");
             setLoading(false);
@@ -45,11 +45,11 @@ export default function Checkout({ tipo = "pedido" }) {
           }
 
           const data = JSON.parse(suscripcionData);
-          
+
           // Precios base según tamaño
           let precioBase = 0;
           let kg = 0;
-          
+
           if (data.tamano === "pequena") {
             precioBase = 19.99;
             kg = 5;
@@ -60,7 +60,7 @@ export default function Checkout({ tipo = "pedido" }) {
             precioBase = 49.99;
             kg = 13;
           }
-          
+
           // Aplicar descuento según frecuencia
           let precioFinal = precioBase;
           let descuento = 0;
@@ -81,7 +81,7 @@ export default function Checkout({ tipo = "pedido" }) {
           // Crear producto de suscripción
           const productosSuscripcion = [
             {
-              producto: { 
+              producto: {
                 nombre: nombreCaja + (descuento > 0 ? ` (${descuento}% descuento)` : '')
               },
               cantidad_kg: 1,
@@ -92,7 +92,7 @@ export default function Checkout({ tipo = "pedido" }) {
               esCaja: true
             }
           ];
-          
+
           setProductos(productosSuscripcion);
           setSubtotal(precioFinal);
           setLoading(false);
@@ -102,7 +102,7 @@ export default function Checkout({ tipo = "pedido" }) {
         // Si es pedido normal, cargar carrito
         const data = await getCarrito();
         const items = data.items || [];
-        
+
         if (items.length === 0) {
           setError("Tu carrito está vacío. Añade productos antes de continuar.");
           setLoading(false);
@@ -118,7 +118,7 @@ export default function Checkout({ tipo = "pedido" }) {
           const cantidad = parseFloat(item.cantidad_kg) || 0;
           return acc + (precio * cantidad);
         }, 0);
-        
+
         setSubtotal(sub);
         setLoading(false);
 
@@ -137,92 +137,92 @@ export default function Checkout({ tipo = "pedido" }) {
   const handleConfirmar = async () => {
     // Validar datos del cliente
     if (!cliente.nombre || !cliente.direccion || !cliente.cp || !cliente.localidad) {
-        setMensaje("❌ Por favor completa todos los campos obligatorios");
-        setTimeout(() => setMensaje(""), 4000);
-        return;
+      setMensaje("❌ Por favor completa todos los campos obligatorios");
+      setTimeout(() => setMensaje(""), 4000);
+      return;
     }
 
     // Validar email
     if (!cliente.email || !cliente.email.includes("@")) {
-        setMensaje("❌ Por favor introduce un email válido");
-        setTimeout(() => setMensaje(""), 4000);
-        return;
+      setMensaje("❌ Por favor introduce un email válido");
+      setTimeout(() => setMensaje(""), 4000);
+      return;
     }
 
     // Validar que haya productos
     if (productos.length === 0) {
-        setMensaje("❌ No hay productos en el pedido");
-        setTimeout(() => setMensaje(""), 4000);
-        return;
+      setMensaje("❌ No hay productos en el pedido");
+      setTimeout(() => setMensaje(""), 4000);
+      return;
     }
 
     setMensaje("⏳ Generando factura...");
 
     try {
-        const productosFactura = productos.map(prod => ({
-            nombre: prod.producto?.nombre || "Producto",
-            cantidad: prod.cantidad_kg || 1,
-            precio: prod.precio_unitario || 0,
-        }));
+      const productosFactura = productos.map(prod => ({
+        nombre: prod.producto?.nombre || "Producto",
+        cantidad: prod.cantidad_kg || 1,
+        precio: prod.precio_unitario || 0,
+      }));
 
-        const tipoFactura = tipo === "suscripcion" || location.pathname === "/checkout-suscripcion" 
-            ? "suscripcion" 
-            : "pedido";
+      const tipoFactura = tipo === "suscripcion" || location.pathname === "/checkout-suscripcion"
+        ? "suscripcion"
+        : "pedido";
 
-        const factura = await generarFactura({
-            tipo: tipoFactura,
-            productos: productosFactura,
-            subtotal,
-            gastos_envio: gastosEnvio,
-            total,
-            metodoPago,
-            cliente_nombre: cliente.nombre,
-            cliente_email: cliente.email,
-            cliente_direccion: cliente.direccion,
-            cliente_cp: cliente.cp,
-            cliente_localidad: cliente.localidad,
-            cliente_provincia: cliente.provincia
-        });
+      const factura = await generarFactura({
+        tipo: tipoFactura,
+        productos: productosFactura,
+        subtotal,
+        gastos_envio: gastosEnvio,
+        total,
+        metodoPago,
+        cliente_nombre: cliente.nombre,
+        cliente_email: cliente.email,
+        cliente_direccion: cliente.direccion,
+        cliente_cp: cliente.cp,
+        cliente_localidad: cliente.localidad,
+        cliente_provincia: cliente.provincia
+      });
 
-        setMensaje("✅ Pedido confirmado con éxito. Factura generada.");
-         if (verFactura && factura.url) {
+      setMensaje("✅ Pedido confirmado con éxito. Factura generada.");
+      if (verFactura && factura.url) {
         window.open(factura.url, "_blank");
-         }
+      }
 
-        // LIMPIAR CARRITO Y ACTUALIZAR CONTEXTO
-        setTimeout(async () => {
-            setMensaje("");
-            
-            if (tipoFactura === "suscripcion") {
-                // Limpiar sessionStorage si es suscripción
-                sessionStorage.removeItem("suscripcionData");
-                navigate("/");
-            } else {
-                // Si es pedido normal, vaciar el carrito usando la función del contexto
-                try {
-                    console.log("🧹 Vaciando carrito después de confirmar pedido...");
-                    
-                    // ✅ Usar clear() del contexto (la misma que el botón "Vaciar carrito")
-                    // Esta función actualiza automáticamente el backend Y el contexto
-                    await clear();
-                    
-                    console.log("✅ Carrito vaciado completamente");
-                    
-                    // Redirigir al inicio SIN recargar página
-                    navigate("/");
-                    
-                } catch (error) {
-                    console.error("⚠️ Error al vaciar el carrito:", error);
-                    // Si falla, redirigir de todas formas
-                    navigate("/");
-                }
-            }
-        }, 3000);
+      // LIMPIAR CARRITO Y ACTUALIZAR CONTEXTO
+      setTimeout(async () => {
+        setMensaje("");
+
+        if (tipoFactura === "suscripcion") {
+          // Limpiar sessionStorage si es suscripción
+          sessionStorage.removeItem("suscripcionData");
+          navigate("/");
+        } else {
+          // Si es pedido normal, vaciar el carrito usando la función del contexto
+          try {
+
+
+            // ✅ Usar clear() del contexto (la misma que el botón "Vaciar carrito")
+            // Esta función actualiza automáticamente el backend Y el contexto
+            await clear();
+
+
+
+            // Redirigir al inicio SIN recargar página
+            navigate("/");
+
+          } catch (error) {
+            console.error("⚠️ Error al vaciar el carrito:", error);
+            // Si falla, redirigir de todas formas
+            navigate("/");
+          }
+        }
+      }, 3000);
 
     } catch (err) {
-        console.error("Error completo:", err);
-        setMensaje(`❌ Error: ${err.message}`);
-        setTimeout(() => setMensaje(""), 6000);
+      console.error("Error completo:", err);
+      setMensaje(`❌ Error: ${err.message}`);
+      setTimeout(() => setMensaje(""), 6000);
     }
   };
 
@@ -274,46 +274,46 @@ export default function Checkout({ tipo = "pedido" }) {
                 <h2>Datos de Envío</h2>
               </div>
               <div className="checkout-card-body">
-                <input 
-                  type="text" 
-                  placeholder="Nombre completo *" 
+                <input
+                  type="text"
+                  placeholder="Nombre completo *"
                   value={cliente.nombre}
-                  onChange={(e) => setCliente({...cliente, nombre: e.target.value})}
+                  onChange={(e) => setCliente({ ...cliente, nombre: e.target.value })}
                   required
                 />
-                <input 
-                  type="email" 
-                  placeholder="Email *" 
+                <input
+                  type="email"
+                  placeholder="Email *"
                   value={cliente.email}
-                  onChange={(e) => setCliente({...cliente, email: e.target.value})}
+                  onChange={(e) => setCliente({ ...cliente, email: e.target.value })}
                   required
                 />
-                <input 
-                  type="text" 
-                  placeholder="Dirección *" 
+                <input
+                  type="text"
+                  placeholder="Dirección *"
                   value={cliente.direccion}
-                  onChange={(e) => setCliente({...cliente, direccion: e.target.value})}
+                  onChange={(e) => setCliente({ ...cliente, direccion: e.target.value })}
                   required
                 />
-                <input 
-                  type="text" 
-                  placeholder="Código Postal *" 
+                <input
+                  type="text"
+                  placeholder="Código Postal *"
                   value={cliente.cp}
-                  onChange={(e) => setCliente({...cliente, cp: e.target.value})}
+                  onChange={(e) => setCliente({ ...cliente, cp: e.target.value })}
                   required
                 />
-                <input 
-                  type="text" 
-                  placeholder="Localidad *" 
+                <input
+                  type="text"
+                  placeholder="Localidad *"
                   value={cliente.localidad}
-                  onChange={(e) => setCliente({...cliente, localidad: e.target.value})}
+                  onChange={(e) => setCliente({ ...cliente, localidad: e.target.value })}
                   required
                 />
-                <input 
-                  type="text" 
-                  placeholder="Provincia *" 
+                <input
+                  type="text"
+                  placeholder="Provincia *"
                   value={cliente.provincia}
-                  onChange={(e) => setCliente({...cliente, provincia: e.target.value})}
+                  onChange={(e) => setCliente({ ...cliente, provincia: e.target.value })}
                   required
                 />
               </div>
@@ -369,7 +369,7 @@ export default function Checkout({ tipo = "pedido" }) {
                 border: "1px solid #ffc107"
               }}>
                 <strong>🔄 Suscripción activa</strong>
-                <p style={{margin: "5px 0 0 0", fontSize: "12px", color: "#856404"}}>
+                <p style={{ margin: "5px 0 0 0", fontSize: "12px", color: "#856404" }}>
                   Precio por entrega con descuento aplicado
                 </p>
               </div>
@@ -418,15 +418,15 @@ export default function Checkout({ tipo = "pedido" }) {
               Ver factura al finalizar
             </label>
             <button className="btn-confirmar" onClick={handleConfirmar}>
-              <CheckCircle className="icon" /> 
+              <CheckCircle className="icon" />
               {esSuscripcion ? "CONFIRMAR SUSCRIPCIÓN" : "CONFIRMAR PEDIDO"}
             </button>
 
             {mensaje && (
               <div className={
-                mensaje.includes("✅") ? "mensaje-exito" : 
-                mensaje.includes("⏳") ? "mensaje-info" : 
-                "mensaje-error"
+                mensaje.includes("✅") ? "mensaje-exito" :
+                  mensaje.includes("⏳") ? "mensaje-info" :
+                    "mensaje-error"
               }>
                 {mensaje}
               </div>

@@ -10,12 +10,12 @@ class ImagenProducto extends Model
     protected $table = 'imagenes_producto';
 
     protected $fillable = [
-    'producto_id',
-    'nombre_imagen',
-    'url_imagen',
-    'es_principal',
-    'orden',
-];
+        'producto_id',
+        'nombre_imagen',
+        'url_imagen',
+        'es_principal',
+        'orden',
+    ];
 
 
     // 👇 añadimos este campo siempre en la respuesta JSON

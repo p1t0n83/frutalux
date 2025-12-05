@@ -8,7 +8,8 @@ export default function GestionUsuarios() {
   const [searchTerm, setSearchTerm] = useState("");
   const [usuarios, setUsuarios] = useState([]);
   const [error, setError] = useState(null);
-  const navigate=useNavigate();
+  const navigate = useNavigate();
+
   useEffect(() => {
     const cargarUsuarios = async () => {
       try {
@@ -73,28 +74,26 @@ export default function GestionUsuarios() {
               <tbody>
                 {filteredUsers.map((usuario) => (
                   <tr key={usuario.id}>
-                    <td>{usuario.nombre}</td>
-                    <td>{usuario.email}</td>
-                    <td>
+                    <td data-label="Nombre">{usuario.nombre}</td>
+                    <td data-label="Email">{usuario.email}</td>
+                    <td data-label="Tipo">
                       <span
-                        className={`badge ${
-                          usuario.tipo_usuario === "administrador"
-                            ? "admin"
-                            : "cliente"
-                        }`}
+                        className={`badge ${usuario.tipo_usuario === "administrador"
+                          ? "admin"
+                          : "cliente"
+                          }`}
                       >
                         {usuario.tipo_usuario === "administrador"
                           ? "Admin"
                           : "Cliente"}
                       </span>
                     </td>
-                    <td>{usuario.telefono}</td>
-                    <td>{usuario.localidad}</td>
-                    <td>
+                    <td data-label="Teléfono">{usuario.telefono}</td>
+                    <td data-label="Localidad">{usuario.localidad}</td>
+                    <td data-label="Estado">
                       <span
-                        className={`estado ${
-                          usuario.activo ? "activo" : "inactivo"
-                        }`}
+                        className={`estado ${usuario.activo ? "activo" : "inactivo"
+                          }`}
                       >
                         {usuario.activo ? "Activo" : "Inactivo"}
                       </span>

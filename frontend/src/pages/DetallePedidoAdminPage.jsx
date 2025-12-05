@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Link, useParams } from "react-router-dom";
-import { ArrowLeft, User, MapPin, CreditCard, Package, Clock, FileText } from "lucide-react";
+import { ArrowLeft, User, MapPin, CreditCard, Clock, FileText } from "lucide-react";
 import { getPedidoById } from "../services/pedidoService";
 import "../styles/DetallePedidoAdmin.css";
 
@@ -26,10 +26,10 @@ export default function DetallePedidoAdminPage() {
 
   const fechaPedido = pedido.created_at
     ? new Date(pedido.created_at).toLocaleDateString("es-ES", {
-        day: "2-digit",
-        month: "2-digit",
-        year: "numeric",
-      })
+      day: "2-digit",
+      month: "2-digit",
+      year: "numeric",
+    })
     : "";
 
   return (
@@ -43,7 +43,7 @@ export default function DetallePedidoAdminPage() {
                 <ArrowLeft className="w-6 h-6 text-gray-700" />
               </button>
             </Link>
-            <div>
+            <div className="detalle-title-wrapper">
               <h1 className="detalle-title">Pedido {pedido.numero_pedido}</h1>
               <p className="detalle-subtitle">Realizado el {fechaPedido}</p>
             </div>
@@ -71,8 +71,8 @@ export default function DetallePedidoAdminPage() {
                 <h3>Cliente</h3>
               </div>
               <div className="detalle-card-body">
-                <p>{pedido.cliente_nombre || "Sin nombre"}</p>
-                <p>{pedido.cliente_email || "Sin email"}</p>
+                <p><strong>Nombre:</strong> {pedido.cliente_nombre || "Sin nombre"}</p>
+                <p><strong>Email:</strong> {pedido.cliente_email || "Sin email"}</p>
               </div>
             </div>
 
@@ -82,35 +82,9 @@ export default function DetallePedidoAdminPage() {
                 <MapPin className="icon-green" />
                 <h3>Dirección de Envío</h3>
               </div>
-              <p>{pedido.direccion_envio}</p>
-            </div>
-
-            {/* Productos */}
-            <div className="detalle-card">
-              <div className="detalle-card-header">
-                <Package className="icon-green" />
-                <h3>Productos del Pedido</h3>
+              <div className="detalle-card-body">
+                <p>{pedido.direccion_envio}</p>
               </div>
-              <table className="detalle-table">
-                <thead>
-                  <tr>
-                    <th>Producto</th>
-                    <th>Cantidad</th>
-                    <th>Precio Unit.</th>
-                    <th>Subtotal</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {pedido.detalles?.map((prod, i) => (
-                    <tr key={i}>
-                      <td>{prod.nombre}</td>
-                      <td>{prod.cantidad}</td>
-                      <td>{prod.precio_unitario}</td>
-                      <td>{prod.subtotal}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
             </div>
 
             {/* Pago */}
@@ -120,8 +94,8 @@ export default function DetallePedidoAdminPage() {
                 <h3>Información de Pago</h3>
               </div>
               <div className="detalle-card-body">
-                <p>Método: {pedido.metodo_pago || "No especificado"}</p>
-                <p>Estado: {pedido.estado}</p>
+                <p><strong>Método:</strong> {pedido.metodo_pago || "No especificado"}</p>
+                <p><strong>Estado:</strong> <span className="pill pill-green">{pedido.estado}</span></p>
               </div>
             </div>
           </div>
@@ -131,13 +105,22 @@ export default function DetallePedidoAdminPage() {
             <div className="detalle-card">
               <h3>Resumen del Pedido</h3>
               <div className="detalle-card-body">
-                <p>Subtotal: {pedido.subtotal}</p>
-                <p>Gastos envío: {pedido.gastos_envio}</p>
-                <p className="detalle-total">Total: {pedido.total}</p>
+                <div className="detalle-resumen-line">
+                  <span>Subtotal:</span>
+                  <span>{pedido.subtotal}</span>
+                </div>
+                <div className="detalle-resumen-line">
+                  <span>Gastos envío:</span>
+                  <span>{pedido.gastos_envio}</span>
+                </div>
+                <div className="detalle-total">
+                  <span>Total:</span>
+                  <span>{pedido.total}</span>
+                </div>
               </div>
             </div>
 
-            {pedido.timeline && (
+            {pedido.timeline && pedido.timeline.length > 0 && (
               <div className="detalle-card">
                 <div className="detalle-card-header">
                   <Clock className="icon-green" />
@@ -146,7 +129,7 @@ export default function DetallePedidoAdminPage() {
                 <div className="detalle-timeline">
                   {pedido.timeline.map((item, i) => (
                     <div key={i} className="timeline-item">
-                      <div className="timeline-dot dot-gray"></div>
+                      <div className={`timeline-dot ${i === 0 ? 'dot-blue' : 'dot-gray'}`}></div>
                       <div className="timeline-info">
                         <p className="timeline-date">{item.fecha}</p>
                         <p className="timeline-event">{item.evento}</p>

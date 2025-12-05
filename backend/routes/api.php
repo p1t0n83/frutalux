@@ -18,6 +18,7 @@ use App\Http\Controllers\Api\FacturaController;
 | Rutas públicas (no requieren login)
 |--------------------------------------------------------------------------
 */
+
 Route::apiResource('categorias', CategoriaController::class)
     ->only(['index', 'show'])
     ->parameters(['categorias' => 'categoria']);
@@ -47,7 +48,7 @@ Route::middleware('auth:sanctum')->group(function () {
     // Perfil del usuario autenticado
     Route::get('me', [AuthController::class, 'me']);
     Route::post('logout', [AuthController::class, 'logout']);
-    
+
     // Perfil cliente
     Route::put('cliente/perfil', [AuthController::class, 'updatePerfil']);
     Route::put('cliente/password', [AuthController::class, 'updatePassword']);
@@ -59,7 +60,7 @@ Route::middleware('auth:sanctum')->group(function () {
     // Pedidos
     Route::apiResource('pedidos', PedidoController::class)
         ->parameters(['pedidos' => 'pedido']);
-    
+
     Route::get('mis-pedidos', [PedidoController::class, 'misPedidos']);
 
     /*

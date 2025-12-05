@@ -1,36 +1,43 @@
 .suscripciones-container {
   min-height: 100vh;
   background: linear-gradient(to bottom right, #f0fdf4, #fff);
-  padding: 2rem;
+  padding: 1rem;
 }
 
 .content-wrapper {
   max-width: 1200px;
   margin: 0 auto;
+  width: 100%;
 }
 
 /* Header */
 .suscripciones-header {
   text-align: center;
-  margin-bottom: 3rem;
+  margin-bottom: 2rem;
 }
+
 .suscripciones-header h1 {
-  font-size: 3rem;
+  font-size: clamp(1.75rem, 5vw, 3rem);
   font-weight: bold;
   color: #111827;
-  margin-bottom: 1rem;
+  margin-bottom: 0.75rem;
+  line-height: 1.2;
 }
+
 .suscripciones-header p {
-  font-size: 1.25rem;
+  font-size: clamp(1rem, 2.5vw, 1.25rem);
   color: #4b5563;
+  line-height: 1.5;
+  max-width: 700px;
+  margin: 0 auto;
 }
 
 /* Planes */
 .planes-grid {
   display: grid;
-  grid-template-columns: repeat(3, 1fr); 
-  gap: 2rem;
-  margin-bottom: 4rem;
+  grid-template-columns: 1fr;
+  gap: 1.5rem;
+  margin-bottom: 3rem;
 }
 
 .plan-card {
@@ -38,16 +45,24 @@
   border: 2px solid #e5e7eb;
   border-radius: 1rem;
   overflow: hidden;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-  transition: all 0.3s;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
 }
+
 .plan-card:hover {
-  box-shadow: 0 6px 16px rgba(0,0,0,0.15);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+  transform: translateY(-4px);
 }
+
 .plan-card.destacado {
   border-color: #166534;
   box-shadow: 0 0 0 4px #bbf7d0;
+  position: relative;
 }
+
 .plan-popular {
   background: #166534;
   color: white;
@@ -56,67 +71,111 @@
   font-weight: 600;
   font-size: 0.875rem;
 }
+
 .plan-body {
-  padding: 2rem;
+  padding: 1.5rem;
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
 }
+
 .plan-title {
   display: flex;
   align-items: center;
   gap: 0.5rem;
   margin-bottom: 1rem;
 }
+
 .plan-title h3 {
-  font-size: 1.5rem;
+  font-size: clamp(1.25rem, 3vw, 1.5rem);
   font-weight: bold;
   color: #111827;
+  line-height: 1.3;
 }
+
+.plan-precio {
+  margin-bottom: 1rem;
+}
+
 .plan-precio .precio {
-  font-size: 2rem;
+  font-size: clamp(1.5rem, 4vw, 2rem);
   font-weight: bold;
   color: #166534;
-  margin-bottom: 0.5rem;
+  margin-bottom: 0.25rem;
+  line-height: 1.2;
 }
+
 .plan-precio p {
   color: #4b5563;
+  font-size: 0.95rem;
+  margin-bottom: 0.25rem;
 }
+
 .plan-precio .personas {
   font-size: 0.875rem;
+  color: #6b7280;
 }
+
 .plan-incluye {
   margin: 1.5rem 0;
+  flex-grow: 1;
 }
+
 .incluye-item {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   gap: 0.5rem;
   color: #374151;
   font-size: 0.95rem;
+  margin-bottom: 0.75rem;
+  line-height: 1.4;
 }
+
 .icon-check {
   color: #16a34a;
+  flex-shrink: 0;
+  margin-top: 0.15rem;
 }
 
 /* Botón */
 .btn-select {
   width: 100%;
-  padding: 0.75rem;
+  padding: 0.875rem;
   border-radius: 0.5rem;
   font-weight: 600;
-  transition: all 0.2s;
+  transition: all 0.2s ease;
   border: 2px solid #166534;
   color: #166534;
   background: transparent;
+  font-size: 1rem;
+  cursor: pointer;
+  margin-top: auto;
+  min-height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
+
 .btn-select:hover {
   background: #f0fdf4;
+  transform: translateY(-1px);
 }
+
 .btn-select.btn-destacado {
   background: #166534;
   color: white;
   border: none;
+  box-shadow: 0 4px 12px rgba(22, 101, 52, 0.2);
 }
+
 .btn-select.btn-destacado:hover {
   background: #14532d;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(22, 101, 52, 0.3);
+}
+
+.btn-select:active {
+  transform: translateY(0);
 }
 
 /* Frecuencias */
@@ -124,45 +183,69 @@
   background: white;
   border: 1px solid #e5e7eb;
   border-radius: 1rem;
-  padding: 2rem;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  padding: 1.5rem;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  margin-bottom: 2rem;
 }
+
 .frecuencias-header {
   display: flex;
   align-items: center;
   gap: 0.75rem;
   margin-bottom: 1.5rem;
 }
+
 .frecuencias-header h2 {
-  font-size: 1.75rem;
+  font-size: clamp(1.25rem, 3vw, 1.75rem);
   font-weight: bold;
   color: #111827;
+  line-height: 1.3;
 }
+
 .frecuencias-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-  gap: 1.5rem;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 1.25rem;
 }
+
 .frecuencia-item {
   border: 2px solid #e5e7eb;
   border-radius: 0.75rem;
   padding: 1.5rem;
-  transition: all 0.2s;
+  transition: all 0.2s ease;
   cursor: pointer;
+  display: flex;
+  flex-direction: column;
 }
+
 .frecuencia-item:hover {
   border-color: #166534;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(22, 101, 52, 0.1);
 }
+
+.frecuencia-item.selected {
+  border-color: #166534;
+  background: linear-gradient(135deg, #ecfdf5 0%, #f0fdf9 100%);
+  box-shadow: 0 4px 12px rgba(22, 101, 52, 0.15);
+}
+
 .frecuencia-item h3 {
-  font-size: 1.25rem;
+  font-size: clamp(1.125rem, 2.5vw, 1.25rem);
   font-weight: bold;
   color: #111827;
   margin-bottom: 0.5rem;
+  line-height: 1.3;
 }
+
 .frecuencia-item p {
   color: #4b5563;
   margin-bottom: 1rem;
+  line-height: 1.5;
+  font-size: 0.95rem;
+  flex-grow: 1;
 }
+
 .frecuencia-descuento {
   display: flex;
   align-items: center;
@@ -170,4 +253,169 @@
   color: #166534;
   font-weight: 600;
   font-size: 0.9rem;
+  margin-top: auto;
+}
+
+/* Responsive */
+@media (min-width: 640px) {
+  .suscripciones-container {
+    padding: 1.5rem;
+  }
+
+  .suscripciones-header {
+    margin-bottom: 2.5rem;
+  }
+
+  .frecuencias-grid {
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  }
+}
+
+@media (min-width: 768px) {
+  .planes-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .frecuencias-card {
+    padding: 2rem;
+  }
+}
+
+@media (min-width: 1024px) {
+  .planes-grid {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 2rem;
+    margin-bottom: 4rem;
+  }
+
+  .plan-body {
+    padding: 2rem;
+  }
+
+  .suscripciones-container {
+    padding: 2rem;
+  }
+
+  .suscripciones-header {
+    margin-bottom: 3rem;
+  }
+}
+
+/* Para móviles muy pequeños */
+@media (max-width: 374px) {
+  .suscripciones-container {
+    padding: 0.75rem;
+  }
+
+  .plan-card,
+  .frecuencias-card {
+    border-radius: 0.75rem;
+  }
+
+  .plan-body {
+    padding: 1.25rem;
+  }
+
+  .frecuencias-card {
+    padding: 1.25rem;
+  }
+
+  .frecuencia-item {
+    padding: 1.25rem;
+  }
+
+  .btn-select {
+    padding: 0.75rem;
+    font-size: 0.9375rem;
+    min-height: 44px;
+  }
+}
+
+/* Mejoras de accesibilidad */
+.plan-card:focus-within,
+.frecuencia-item:focus-within {
+  outline: 3px solid #166534;
+  outline-offset: 2px;
+}
+
+.btn-select:focus-visible {
+  outline: 3px solid #166534;
+  outline-offset: 2px;
+}
+
+.frecuencia-item:focus-visible {
+  outline: 3px solid #166534;
+  outline-offset: 2px;
+  border-color: transparent;
+}
+
+/* Indicador visual para card destacada */
+.plan-card.destacado::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: #166534;
+  border-radius: 1rem 1rem 0 0;
+}
+
+/* Animación sutil para hover en frecuencia */
+@keyframes pulse {
+  0% {
+    box-shadow: 0 4px 12px rgba(22, 101, 52, 0.1);
+  }
+  50% {
+    box-shadow: 0 4px 20px rgba(22, 101, 52, 0.2);
+  }
+  100% {
+    box-shadow: 0 4px 12px rgba(22, 101, 52, 0.1);
+  }
+}
+
+.frecuencia-item.selected {
+  animation: pulse 2s infinite;
+}
+
+/* Botón de acción final */
+.action-button {
+  width: 100%;
+  max-width: 300px;
+  margin: 2rem auto;
+  display: block;
+  background: #166534;
+  color: white;
+  padding: 1rem 2rem;
+  border: none;
+  border-radius: 0.75rem;
+  font-weight: 600;
+  font-size: 1.125rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-align: center;
+  text-decoration: none;
+  box-shadow: 0 4px 12px rgba(22, 101, 52, 0.3);
+}
+
+.action-button:hover {
+  background: #14532d;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(22, 101, 52, 0.4);
+}
+
+.action-button:active {
+  transform: translateY(0);
+}
+
+@media (min-width: 768px) {
+  .action-button {
+    max-width: 400px;
+    padding: 1.25rem 2.5rem;
+  }
+}
+
+/* Scroll suave */
+.suscripciones-container {
+  scroll-behavior: smooth;
 }

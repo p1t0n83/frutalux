@@ -23,9 +23,9 @@ export default function PreferenciasCaja() {
       preferencias,
       tipo: "suscripcion"
     };
-    
+
     sessionStorage.setItem("suscripcionData", JSON.stringify(datosSuscripcion));
-    
+
     // Redirigir a checkout con tipo suscripcion
     navigate("/checkout-suscripcion");
   };
@@ -41,21 +41,21 @@ export default function PreferenciasCaja() {
             <Package className="icon" />
             <h2>Tamaño de la Caja</h2>
           </div>
-          
+
           <div className="preferencias-options">
             {[
               { id: "pequena", nombre: "Caja Pequeña", peso: "4-6 kg", personas: "1-2 personas", precio: "€19.99" },
               { id: "mediana", nombre: "Caja Mediana", peso: "8-10 kg", personas: "3-4 personas", precio: "€34.99" },
               { id: "grande", nombre: "Caja Grande", peso: "12-15 kg", personas: "5+ personas", precio: "€49.99" }
             ].map((caja) => (
-              <label 
+              <label
                 key={caja.id}
                 className={`preferencias-option ${tamano === caja.id ? "selected" : ""}`}
               >
                 <div className="option-info">
-                  <input 
-                    type="radio" 
-                    name="tamano" 
+                  <input
+                    type="radio"
+                    name="tamano"
                     value={caja.id}
                     checked={tamano === caja.id}
                     onChange={(e) => setTamano(e.target.value)}
@@ -77,21 +77,21 @@ export default function PreferenciasCaja() {
             <Calendar className="icon" />
             <h2>Frecuencia de Entrega</h2>
           </div>
-          
+
           <div className="preferencias-options">
             {[
               { id: "semanal", nombre: "Semanal", descuento: "5% descuento" },
               { id: "quincenal", nombre: "Quincenal", descuento: "3% descuento" },
               { id: "mensual", nombre: "Mensual", descuento: null }
             ].map((freq) => (
-              <label 
+              <label
                 key={freq.id}
                 className={`preferencias-option ${frecuencia === freq.id ? "selected" : ""}`}
               >
                 <div className="option-info">
-                  <input 
-                    type="radio" 
-                    name="frecuencia" 
+                  <input
+                    type="radio"
+                    name="frecuencia"
                     value={freq.id}
                     checked={frecuencia === freq.id}
                     onChange={(e) => setFrecuencia(e.target.value)}
@@ -109,7 +109,7 @@ export default function PreferenciasCaja() {
         {/* Preferencias */}
         <div className="preferencias-card">
           <h2 className="preferencias-subtitle">Preferencias de Productos</h2>
-          
+
           <div className="preferencias-grid">
             {[
               { id: "frutas", nombre: "Frutas", desc: "Manzanas, naranjas, fresas..." },
@@ -117,14 +117,14 @@ export default function PreferenciasCaja() {
               { id: "citricos", nombre: "Cítricos", desc: "Naranjas, limones, mandarinas..." },
               { id: "hortalizas", nombre: "Hortalizas", desc: "Tomates, pimientos, calabacines..." }
             ].map((pref) => (
-              <label 
+              <label
                 key={pref.id}
                 className={`preferencias-option ${preferencias[pref.id] ? "selected" : ""}`}
               >
-                <input 
-                  type="checkbox" 
+                <input
+                  type="checkbox"
                   checked={preferencias[pref.id]}
-                  onChange={(e) => setPreferencias({...preferencias, [pref.id]: e.target.checked})}
+                  onChange={(e) => setPreferencias({ ...preferencias, [pref.id]: e.target.checked })}
                 />
                 <div>
                   <p className="option-title">{pref.nombre}</p>
@@ -136,7 +136,7 @@ export default function PreferenciasCaja() {
 
           <div className="preferencias-note">
             <p>
-              💡 <strong>Nota:</strong> Selecciona tus preferencias. Intentaremos incluir productos que te gusten, 
+              💡 <strong>Nota:</strong> Selecciona tus preferencias. Intentaremos incluir productos que te gusten,
               pero puede variar según disponibilidad de temporada.
             </p>
           </div>

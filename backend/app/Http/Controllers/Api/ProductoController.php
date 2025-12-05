@@ -11,7 +11,7 @@ class ProductoController extends Controller
 {
     public function index()
     {
-        return Producto::with('categoria','imagenes','valoraciones')->get();
+        return Producto::with('categoria', 'imagenes', 'valoraciones')->get();
     }
 
     public function store(Request $request)
@@ -31,7 +31,7 @@ class ProductoController extends Controller
 
     public function show($id)
     {
-        return Producto::with('categoria','imagenes','valoraciones')->findOrFail($id);
+        return Producto::with('categoria', 'imagenes', 'valoraciones')->findOrFail($id);
     }
 
     public function update(Request $request, $id)

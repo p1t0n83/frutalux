@@ -71,8 +71,8 @@ class AuthController extends Controller
         }
 
         $user = User::with('carritos', 'pedidos', 'suscripciones', 'valoraciones', 'notificaciones')
-                    ->where('email', $request->email)
-                    ->firstOrFail();
+            ->where('email', $request->email)
+            ->firstOrFail();
 
         // Verificar si el usuario está activo
         if (!$user->activo) {
@@ -109,7 +109,7 @@ class AuthController extends Controller
     public function me(Request $request)
     {
         $user = User::with('carritos', 'pedidos', 'suscripciones', 'valoraciones', 'notificaciones')
-                    ->findOrFail($request->user()->id);
+            ->findOrFail($request->user()->id);
 
         return response()->json($user);
     }
@@ -155,5 +155,4 @@ class AuthController extends Controller
 
         return response()->json(['message' => 'Contraseña actualizada correctamente']);
     }
-
 }

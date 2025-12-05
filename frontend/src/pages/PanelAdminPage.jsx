@@ -37,7 +37,7 @@ function QuickCard({ to, Icon, title, text }) {
 /* ===== Componente auxiliar: fila de pedido ===== */
 function PedidoRow({ pedido }) {
   return (
-    <tr key={pedido.id}>
+    <tr>
       <td>
         <Link to={createPageUrl("DetallePedidoAdmin")} className="pedido-link">
           {pedido.numero}

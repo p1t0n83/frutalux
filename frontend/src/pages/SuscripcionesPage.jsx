@@ -1,28 +1,28 @@
 import React from "react";
 import { Link } from "react-router-dom";
 import { Check, Package, Calendar, Percent } from "lucide-react";
-import "../styles/Suscripciones.css"; 
+import "../styles/Suscripciones.css";
 
 export default function Suscripciones() {
   const planes = [
-    { 
-      tipo: "Pequeña", 
-      peso: "4-6 kg", 
+    {
+      tipo: "Pequeña",
+      peso: "4-6 kg",
       personas: "1-2 personas",
       precio: "19.99",
       incluye: ["3-4 variedades frutas", "2-3 variedades verduras", "Productos de temporada", "Envío incluido"]
     },
-    { 
-      tipo: "Mediana", 
-      peso: "8-10 kg", 
+    {
+      tipo: "Mediana",
+      peso: "8-10 kg",
       personas: "3-4 personas",
       precio: "34.99",
       incluye: ["5-6 variedades frutas", "4-5 variedades verduras", "Productos de temporada", "Envío incluido"],
       destacado: true
     },
-    { 
-      tipo: "Grande", 
-      peso: "12-15 kg", 
+    {
+      tipo: "Grande",
+      peso: "12-15 kg",
       personas: "5+ personas",
       precio: "49.99",
       incluye: ["7-8 variedades frutas", "6-7 variedades verduras", "Productos de temporada", "Envío incluido"]
@@ -47,7 +47,7 @@ export default function Suscripciones() {
         {/* Planes */}
         <div className="planes-grid">
           {planes.map((plan) => (
-            <div 
+            <div
               key={plan.tipo}
               className={`plan-card ${plan.destacado ? "destacado" : ""}`}
             >
@@ -59,7 +59,7 @@ export default function Suscripciones() {
                   <Package className="icon" />
                   <h3>Caja {plan.tipo}</h3>
                 </div>
-                
+
                 <div className="plan-precio">
                   <p className="precio">€{plan.precio}</p>
                   <p>Descripción: {plan.peso}</p>
@@ -91,7 +91,7 @@ export default function Suscripciones() {
             <Calendar className="icon" />
             <h2>Frecuencia de Entrega</h2>
           </div>
-          
+
           <div className="frecuencias-grid">
             {frecuencias.map((freq) => (
               <div key={freq.tipo} className="frecuencia-item">

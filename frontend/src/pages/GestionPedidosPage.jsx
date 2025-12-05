@@ -14,7 +14,7 @@ export default function GestionPedidosPage() {
     const cargarPedidos = async () => {
       try {
         const data = await getPedidos();
-        console.log("Respuesta pedidos:", data);
+
 
         const pedidosNormalizados = (data.data || data.pedidos || data || []).map(p => ({
           id: p.id,
@@ -116,19 +116,18 @@ export default function GestionPedidosPage() {
                     <td className="text-right">{pedido.total}</td>
                     <td>
                       <span
-                        className={`estado-pill ${
-                          pedido.estado === "Entregado"
+                        className={`estado-pill ${pedido.estado === "Entregado"
                             ? "estado-entregado"
                             : pedido.estado === "Enviado"
-                            ? "estado-enviado"
-                            : pedido.estado === "Preparando"
-                            ? "estado-preparando"
-                            : pedido.estado === "Confirmado"
-                            ? "estado-confirmado"
-                            : pedido.estado === "Pagado"
-                            ? "estado-pagado"
-                            : "estado-pendiente"
-                        }`}
+                              ? "estado-enviado"
+                              : pedido.estado === "Preparando"
+                                ? "estado-preparando"
+                                : pedido.estado === "Confirmado"
+                                  ? "estado-confirmado"
+                                  : pedido.estado === "Pagado"
+                                    ? "estado-pagado"
+                                    : "estado-pendiente"
+                          }`}
                       >
                         {pedido.estado}
                       </span>

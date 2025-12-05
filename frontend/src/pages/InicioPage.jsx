@@ -9,7 +9,7 @@ export default function InicioPage() {
       {/* Hero Section */}
       <section className="hero-section">
         <div className="hero-content">
-         
+
           <h1 className="hero-title">Productos frescos del agricultor a tu mesa</h1>
           <p className="hero-description">
             Compra frutas y verduras de origen español directamente de productores locales.

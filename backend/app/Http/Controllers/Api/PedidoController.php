@@ -10,21 +10,21 @@ class PedidoController extends Controller
 {
     public function index()
     {
-        return Pedido::with('usuario','detalles','pagos')->get();
+        return Pedido::with('usuario', 'detalles', 'pagos')->get();
     }
 
     public function misPedidos(Request $request)
-{
-    // Obtener el usuario autenticado
-    $userId = $request->user()->id;
+    {
+        // Obtener el usuario autenticado
+        $userId = $request->user()->id;
 
-    // Devolver solo los pedidos de ese cliente
-    $pedidos = Pedido::with('detalles','pagos')
-        ->where('user_id', $userId)
-        ->get();
+        // Devolver solo los pedidos de ese cliente
+        $pedidos = Pedido::with('detalles', 'pagos')
+            ->where('user_id', $userId)
+            ->get();
 
-    return response()->json($pedidos);
-}
+        return response()->json($pedidos);
+    }
 
 
     public function store(Request $request)
@@ -54,7 +54,7 @@ class PedidoController extends Controller
 
     public function show($id)
     {
-        return Pedido::with('usuario','detalles','pagos')->findOrFail($id);
+        return Pedido::with('usuario', 'detalles', 'pagos')->findOrFail($id);
     }
 
     public function update(Request $request, $id)

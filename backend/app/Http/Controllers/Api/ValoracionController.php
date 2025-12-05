@@ -10,7 +10,7 @@ class ValoracionController extends Controller
 {
     public function index()
     {
-        return Valoracion::with('usuario','producto')->get();
+        return Valoracion::with('usuario', 'producto')->get();
     }
 
     public function store(Request $request)
@@ -28,7 +28,7 @@ class ValoracionController extends Controller
 
     public function show($id)
     {
-        return Valoracion::with('usuario','producto')->findOrFail($id);
+        return Valoracion::with('usuario', 'producto')->findOrFail($id);
     }
 
     public function update(Request $request, $id)

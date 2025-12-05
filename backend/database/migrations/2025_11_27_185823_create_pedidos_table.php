@@ -12,8 +12,8 @@ return new class extends Migration
             $table->id();
             $table->foreignId('user_id')->constrained('users')->onDelete('cascade');
             $table->string('numero_pedido', 50)->unique();
-            $table->enum('tipo_pedido', ['carrito','suscripcion']);
-            $table->enum('estado', ['pendiente','pagado','enviado','entregado','cancelado'])->default('pendiente');
+            $table->enum('tipo_pedido', ['carrito', 'suscripcion']);
+            $table->enum('estado', ['pendiente', 'pagado', 'enviado', 'entregado', 'cancelado'])->default('pendiente');
             $table->decimal('subtotal', 10, 2);
             $table->decimal('gastos_envio', 10, 2)->default(0);
             $table->decimal('total', 10, 2);
@@ -35,4 +35,3 @@ return new class extends Migration
         Schema::dropIfExists('pedidos');
     }
 };
-

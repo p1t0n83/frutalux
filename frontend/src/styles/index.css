@@ -6,6 +6,8 @@
   color: rgba(255, 255, 255, 0.87);
   font-synthesis: none;
   text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 @media (prefers-color-scheme: light) {
@@ -14,12 +16,31 @@
   }
 }
 
-/* ARREGLO PRINCIPAL - Cambiar display de flex a block */
+/* Reset crítico para móvil */
+html {
+  width: 100%;
+  overflow-x: hidden;
+  -webkit-text-size-adjust: 100%;
+  scroll-behavior: smooth; /* 👈 Mejora para navegación suave */
+}
+
+/* ARREGLO PRINCIPAL - Asegurar ancho completo */
 body {
   margin: 0;
+  padding: 0;
   display: block;
   min-width: 320px;
   min-height: 100vh;
+  width: 100%;
+  overflow-x: hidden;
+  box-sizing: border-box;
+}
+
+/* Asegurar que el root de React también sea 100% */
+#root {
+  width: 100%;
+  overflow-x: hidden;
+  min-height: 100vh; /* 👈 Asegura altura completa */
 }
 
 /* Clase compartida para centrar contenido en todas las páginas */
@@ -33,9 +54,68 @@ body {
   box-sizing: border-box;
 }
 
+/* Responsive para section-content */
+@media (max-width: 768px) {
+  .section-content {
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .section-content {
+    padding-left: 0.75rem;
+    padding-right: 0.75rem;
+  }
+}
+
 /* Utilidad por si necesitas flex-center en algún componente específico */
 .flex-center {
   display: flex;
   place-items: center;
   justify-content: center;
+}
+
+/* Prevenir scroll horizontal en móvil */
+* {
+  box-sizing: border-box;
+}
+
+img {
+  max-width: 100%;
+  height: auto;
+  display: block; /* 👈 Evita espacio extra debajo de imágenes */
+}
+
+/* 👇 AÑADIDOS ÚTILES PARA RESPONSIVE */
+
+/* Prevenir zoom en inputs en iOS */
+input,
+select,
+textarea {
+  font-size: 16px; /* iOS no hace zoom si es >= 16px */
+}
+
+@media (max-width: 480px) {
+  input,
+  select,
+  textarea {
+    font-size: 16px; /* Asegurar en móvil */
+  }
+}
+
+/* Tablas responsivas por defecto */
+table {
+  width: 100%;
+  overflow-x: auto;
+  display: block;
+}
+
+/* Botones táctiles más grandes en móvil */
+@media (max-width: 768px) {
+  button,
+  a {
+    min-height: 44px; /* Tamaño mínimo táctil recomendado */
+    min-width: 44px;
+  }
 }

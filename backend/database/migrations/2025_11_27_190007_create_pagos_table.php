@@ -16,7 +16,7 @@ return new class extends Migration
             $table->foreignId('pedido_id')->constrained('pedidos')->onDelete('cascade');
             $table->foreignId('metodo_pago_id')->constrained('metodos_pago')->onDelete('cascade');
             $table->decimal('importe', 10, 2);
-            $table->enum('estado', ['pendiente','completado','fallido'])->default('pendiente');
+            $table->enum('estado', ['pendiente', 'completado', 'fallido'])->default('pendiente');
             $table->string('referencia_externa', 255)->nullable();
             $table->timestamp('fecha_pago')->nullable();
             $table->timestamps();

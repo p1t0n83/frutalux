@@ -10,7 +10,7 @@ class SuscripcionController extends Controller
 {
     public function index()
     {
-        return Suscripcion::with('usuario','entregas')->get();
+        return Suscripcion::with('usuario', 'entregas')->get();
     }
 
     public function store(Request $request)
@@ -28,7 +28,7 @@ class SuscripcionController extends Controller
 
     public function show($id)
     {
-        return Suscripcion::with('usuario','entregas')->findOrFail($id);
+        return Suscripcion::with('usuario', 'entregas')->findOrFail($id);
     }
 
     public function update(Request $request, $id)

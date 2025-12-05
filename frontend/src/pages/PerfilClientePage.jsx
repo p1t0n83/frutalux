@@ -46,23 +46,23 @@ export default function PerfilCliente() {
   }, []);
 
   // Cargar pedidos cuando se cambia a la pestaña de pedidos
- useEffect(() => {
-  if (activeTab === "pedidos") {
-    const cargarPedidos = async () => {
-      setLoadingPedidos(true);
-      try {
-        const data = await getMisPedidos();
-        setPedidos(data || []);
-      } catch (err) {
-        console.error("Error al cargar pedidos:", err);
-        setPedidos([]);
-      } finally {
-        setLoadingPedidos(false);
-      }
-    };
-    cargarPedidos();
-  }
-}, [activeTab]);
+  useEffect(() => {
+    if (activeTab === "pedidos") {
+      const cargarPedidos = async () => {
+        setLoadingPedidos(true);
+        try {
+          const data = await getMisPedidos();
+          setPedidos(data || []);
+        } catch (err) {
+          console.error("Error al cargar pedidos:", err);
+          setPedidos([]);
+        } finally {
+          setLoadingPedidos(false);
+        }
+      };
+      cargarPedidos();
+    }
+  }, [activeTab]);
 
 
   const handleSave = async () => {

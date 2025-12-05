@@ -16,7 +16,7 @@ return new class extends Migration
             $table->foreignId('suscripcion_id')->constrained('suscripciones')->onDelete('cascade');
             $table->date('fecha_programada');
             $table->date('fecha_entregada')->nullable();
-            $table->enum('estado', ['pendiente','enviado','entregado'])->default('pendiente');
+            $table->enum('estado', ['pendiente', 'enviado', 'entregado'])->default('pendiente');
             $table->timestamps();
         });
     }

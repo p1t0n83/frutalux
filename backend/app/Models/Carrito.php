@@ -8,8 +8,12 @@ class Carrito extends Model
 {
     protected $fillable = ['user_id'];
 
-    public function usuario() { return $this->belongsTo(User::class); }
-    public function items() { return $this->hasMany(CarritoItem::class); }
-    
+    public function usuario()
+    {
+        return $this->belongsTo(User::class);
+    }
+    public function items()
+    {
+        return $this->hasMany(CarritoItem::class);
+    }
 }
-

@@ -11,7 +11,7 @@ import {
   ChevronRight,
 } from "lucide-react";
 import { getProducto } from "../services/productoService"; // 👈 import correcto
-import { useCarrito } from "../context/CarritoContext"; 
+import { useCarrito } from "../context/CarritoContext";
 import "../styles/DetalleProducto.css";
 
 export default function DetalleProducto() {

@@ -11,7 +11,7 @@ class UserController extends Controller
 {
     public function index()
     {
-        return User::with('carritos','pedidos','suscripciones','valoraciones','notificaciones')->get();
+        return User::with('carritos', 'pedidos', 'suscripciones', 'valoraciones', 'notificaciones')->get();
     }
 
     public function store(Request $request)
@@ -31,7 +31,7 @@ class UserController extends Controller
 
     public function show($id)
     {
-        return User::with('carritos','pedidos','suscripciones','valoraciones','notificaciones')->findOrFail($id);
+        return User::with('carritos', 'pedidos', 'suscripciones', 'valoraciones', 'notificaciones')->findOrFail($id);
     }
 
     public function update(Request $request, $id)

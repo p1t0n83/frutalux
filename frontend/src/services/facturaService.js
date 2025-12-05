@@ -9,7 +9,7 @@ const API_BASE = import.meta.env.VITE_API_URL || "http://localhost:8000/api";
 export async function generarFactura(payload) {
   try {
     const token = localStorage.getItem("token");
-    
+
     if (!token) {
       throw new Error("No hay sesión activa. Por favor, inicia sesión.");
     }
@@ -26,7 +26,7 @@ export async function generarFactura(payload) {
 
     // Si la respuesta es JSON (error), parsearla
     const contentType = res.headers.get("content-type");
-    
+
     if (!res.ok) {
       if (contentType && contentType.includes("application/json")) {
         const errorData = await res.json();
@@ -41,9 +41,9 @@ export async function generarFactura(payload) {
     // Si todo va bien, procesar el PDF
     const blob = await res.blob();
     const url = URL.createObjectURL(blob);
-    
+
     return { url };
-    
+
   } catch (err) {
     console.error("facturaService error:", err);
     throw err;

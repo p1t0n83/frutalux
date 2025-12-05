@@ -8,17 +8,18 @@ use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Log;
 use App\Models\Pedido;
+
 class FacturaController extends Controller
 {
     public function generar(Request $request)
     {
         try {
             $user = $request->user();
-            
+
             // Datos de la factura
             $numero = 'FAC-' . now()->format('YmdHis');
             $fecha = now()->format('d/m/Y');
-            
+
             // Datos del cliente desde frontend
             $cliente = $request->cliente_nombre ?? $user->name;
             $clienteEmail = $request->cliente_email ?? $user->email ?? '';
@@ -26,7 +27,7 @@ class FacturaController extends Controller
             $clienteCp = $request->cliente_cp ?? '';
             $clienteLocalidad = $request->cliente_localidad ?? '';
             $clienteProvincia = $request->cliente_provincia ?? '';
-            
+
             // Datos del vendedor (FRUTALUX)
             $vendedorNombre = 'FRUTALUX';
             $vendedorDireccion = 'Zurita';
@@ -35,10 +36,10 @@ class FacturaController extends Controller
             $vendedorPais = 'España';
             $vendedorTelefono = '+34 942 000 000';
             $vendedorCif = 'B-98765432';
-            
+
             // Tipo de pedido
             $tipoFactura = $request->tipo ?? 'pedido';
-            
+
             // Metodo de pago
             $metodoPago = $request->metodoPago ?? 'tarjeta';
             // Obtener valores numéricos para el pedido
@@ -70,15 +71,15 @@ class FacturaController extends Controller
             $subtotal = number_format($request->subtotal ?? 0, 2, ',', '.');
             $gastosEnvio = number_format($request->gastos_envio ?? 0, 2, ',', '.');
             $total = number_format($request->total ?? 0, 2, ',', '.');
-            
+
             // Generar datos de pago
             $datosPago = $this->generarDatosPago($metodoPago);
-            
+
             // Texto especial según tipo
-            $textoTipo = $tipoFactura === 'suscripcion' 
+            $textoTipo = $tipoFactura === 'suscripcion'
                 ? '<p style="background: #fff3cd; padding: 10px; border-left: 4px solid #ffc107; margin: 20px 0;"><strong>SUSCRIPCIÓN ACTIVA:</strong> Este pedido forma parte de tu suscripción recurrente.</p>'
                 : '';
-            
+
             // Generar filas de productos
             $productosHtml = '';
             foreach ($productos as $prod) {
@@ -86,7 +87,7 @@ class FacturaController extends Controller
                 $cantidad = $prod['cantidad'] ?? 1;
                 $precio = number_format($prod['precio'] ?? 0, 2, ',', '.');
                 $totalProd = number_format(($prod['precio'] ?? 0) * $cantidad, 2, ',', '.');
-                
+
                 $productosHtml .= "
                     <tr>
                         <td>{$nombreProd}</td>
@@ -95,7 +96,7 @@ class FacturaController extends Controller
                         <td class=\"text-right\"><strong>{$totalProd} EUR</strong></td>
                     </tr>";
             }
-            
+
             // HTML completo
             $html = $this->generarHtmlFactura(
                 $vendedorNombre,
@@ -120,13 +121,13 @@ class FacturaController extends Controller
                 $total,
                 $datosPago
             );
-            
+
             // Crear PDF
             $pdf = Pdf::loadHTML($html)
                 ->setPaper('a4', 'portrait')
                 ->setOption('isHtml5ParserEnabled', true)
                 ->setOption('isRemoteEnabled', false);
-            
+
             // Guardar
             $filename = "Factura-{$numero}.pdf";
             $pdfOutput = $pdf->output();
@@ -137,15 +138,14 @@ class FacturaController extends Controller
             ]);
 
             return response($pdfOutput, 200)
-            ->header('Content-Type', 'application/pdf')
-            ->header('Content-Disposition', "inline; filename=\"{$filename}\"")
-            ->header('X-Pedido-Id', $pedido->id)
-            ->header('X-Pedido-Numero', $pedido->numero_pedido);
-                
+                ->header('Content-Type', 'application/pdf')
+                ->header('Content-Disposition', "inline; filename=\"{$filename}\"")
+                ->header('X-Pedido-Id', $pedido->id)
+                ->header('X-Pedido-Numero', $pedido->numero_pedido);
         } catch (\Exception $e) {
             Log::error('Error generando factura: ' . $e->getMessage());
             Log::error('Stack trace: ' . $e->getTraceAsString());
-            
+
             return response()->json([
                 'error' => 'Error al generar la factura',
                 'message' => $e->getMessage(),
@@ -153,7 +153,7 @@ class FacturaController extends Controller
             ], 500);
         }
     }
-    
+
     private function generarHtmlFactura(
         $vendedorNombre,
         $vendedorDireccion,
@@ -420,7 +420,7 @@ class FacturaController extends Controller
 </body>
 </html>';
     }
-    
+
     private function generarDatosPago($metodoPago)
     {
         switch ($metodoPago) {
@@ -429,20 +429,20 @@ class FacturaController extends Controller
                         <p><strong>Número:</strong> **** **** **** 4532</p>
                         <p><strong>Fecha:</strong> ' . now()->format('d/m/Y H:i') . '</p>
                         <p><strong>Estado:</strong> PAGADO</p>';
-                        
+
             case 'transferencia':
                 return '<p><strong>Método:</strong> Transferencia bancaria</p>
                         <p><strong>IBAN:</strong> ES91 2100 0418 4502 0005 1332</p>
                         <p><strong>Beneficiario:</strong> FRUTALUX SL</p>
                         <p><strong>Concepto:</strong> Pedido ' . now()->format('YmdHis') . '</p>
                         <p><strong>Estado:</strong> PENDIENTE DE RECIBIR</p>';
-                        
+
             case 'reembolso':
                 return '<p><strong>Método:</strong> Contra reembolso</p>
                         <p><strong>Importe a pagar:</strong> Al recibir el pedido</p>
                         <p><strong>Aceptamos:</strong> Efectivo y tarjeta</p>
                         <p><strong>Estado:</strong> PENDIENTE DE PAGO EN ENTREGA</p>';
-                        
+
             default:
                 return '<p><strong>Método:</strong> ' . htmlspecialchars($metodoPago, ENT_QUOTES, 'UTF-8') . '</p>';
         }

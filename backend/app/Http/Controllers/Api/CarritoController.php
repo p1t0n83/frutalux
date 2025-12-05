@@ -12,7 +12,7 @@ class CarritoController extends Controller
     // Devuelve todos los carritos (solo para administración)
     public function index()
     {
-        return Carrito::with('usuario','items.producto')->get();
+        return Carrito::with('usuario', 'items.producto')->get();
     }
 
     // Devuelve el carrito del usuario autenticado, lo crea si no existe
@@ -25,7 +25,7 @@ class CarritoController extends Controller
             ['estado' => 'activo'] // si tienes campo estado
         );
 
-        return response()->json($carrito->load('usuario','items.producto'));
+        return response()->json($carrito->load('usuario', 'items.producto'));
     }
 
     // Actualiza datos del carrito (ej: cambiar user_id si fuese necesario)
@@ -36,7 +36,7 @@ class CarritoController extends Controller
 
         $carrito->update($request->only('estado')); // ejemplo si quieres actualizar estado
 
-        return response()->json($carrito->load('usuario','items.producto'));
+        return response()->json($carrito->load('usuario', 'items.producto'));
     }
 
     // Elimina el carrito del usuario autenticado
@@ -64,7 +64,7 @@ class CarritoController extends Controller
         $validated = $request->validate([
             'producto_id'    => 'required|exists:productos,id',
             'cantidad_kg'    => 'required|numeric|min:0.5',
-            'precio_unitario'=> 'required|numeric|min:0',
+            'precio_unitario' => 'required|numeric|min:0',
         ]);
 
         $item = $carrito->items()->where('producto_id', $validated['producto_id'])->first();

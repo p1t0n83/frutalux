@@ -13,7 +13,7 @@ class ValoracionSeeder extends Seeder
      */
     public function run(): void
     {
-        
+
 
         // Valoraciones para producto 1
         Valoracion::create([
