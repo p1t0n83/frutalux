@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import { ArrowLeft, Save, Trash2, Image as ImageIcon } from "lucide-react";
 import {
@@ -11,53 +11,57 @@ import {
 } from "../services/productoService";
 import "../styles/DetalleProductoAdmin.css";
 
+const FORM_INICIAL = {
+  nombre: "",
+  descripcion: "",
+  nombreProductor: "",
+  origen: "",
+  categoria: "",
+  temporada: "",
+  certificaciones: "",
+  slug: "",
+  precio_kg: "",
+  stock_kg: "",
+  stock_minimo: "",
+  precio_oferta: "",
+  descuento: "",
+  coste_produccion: "",
+  activo: true,
+  destacado: false,
+  visible_catalogo: true,
+};
+
 export default function DetalleProductoAdminPage() {
   const { id } = useParams();
   const navigate = useNavigate();
 
-  const [formData, setFormData] = useState({
-    nombre: "",
-    descripcion: "",
-    nombreProductor: "",
-    origen: "",
-    categoria: "",
-    temporada: "",
-    certificaciones: "",
-    slug: "",
-    precio_kg: "",
-    stock_kg: "",
-    stock_minimo: "",
-    precio_oferta: "",
-    descuento: "",
-    coste_produccion: "",
-    activo: true,
-    destacado: false,
-    visible_catalogo: true,
-  });
-
+  const [formData, setFormData] = useState(FORM_INICIAL);
   const [imagenes, setImagenes] = useState([]);
   const [loading, setLoading] = useState(!!id);
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    if (id) {
-      const cargarProducto = async () => {
-        try {
-          const data = await getProducto(id); // ✅ ya no pasamos token, lo gestiona el service
-          setFormData({ ...formData, ...data });
-          setImagenes(data.imagenes || []);
-        } catch (err) {
-          setError("Error al cargar producto");
-        } finally {
-          setLoading(false);
-        }
-      };
-      cargarProducto();
-    }
+    if (!id) return;
+
+    const cargarProducto = async () => {
+      try {
+        const data = await getProducto(id);
+        setFormData({ ...FORM_INICIAL, ...data });
+        setImagenes(data.imagenes || []);
+      } catch (err) {
+        console.error("Error al cargar producto:", err);
+        setError("Error al cargar producto");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    cargarProducto();
   }, [id]);
 
   const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
+    const { name, value } = e.target;
+    setFormData({ ...formData, [name]: value });
   };
 
   const handleSave = async () => {
@@ -69,15 +73,21 @@ export default function DetalleProductoAdminPage() {
       }
       navigate("/gestion-productos");
     } catch (err) {
+      console.error("Error al guardar producto:", err);
       setError("Error al guardar producto");
     }
   };
 
   const handleDelete = async () => {
+    if (!window.confirm("¿Estás seguro de eliminar este producto?")) {
+      return;
+    }
+
     try {
       await deleteProducto(id);
       navigate("/gestion-productos");
     } catch (err) {
+      console.error("Error al eliminar producto:", err);
       setError("Error al eliminar producto");
     }
   };
@@ -85,25 +95,38 @@ export default function DetalleProductoAdminPage() {
   const handleAddImage = async (e) => {
     const file = e.target.files[0];
     if (!file) return;
+
     try {
-      const nueva = await addProductoImagen(id, file);
-      setImagenes((prev) => [...prev, nueva]);
+      const nuevaImagen = await addProductoImagen(id, file);
+      setImagenes((prevImagenes) => [...prevImagenes, nuevaImagen]);
+      e.target.value = "";
     } catch (err) {
+      console.error("Error al subir imagen:", err);
       setError("Error al subir imagen");
     }
   };
 
   const handleDeleteImage = async (imagenId) => {
+    if (!window.confirm("¿Estás seguro de eliminar esta imagen?")) {
+      return;
+    }
+
     try {
       await deleteProductoImagen(id, imagenId);
-      setImagenes((prev) => prev.filter((img) => img.id !== imagenId));
+      setImagenes((prevImagenes) => prevImagenes.filter((img) => img.id !== imagenId));
     } catch (err) {
+      console.error("Error al borrar imagen:", err);
       setError("Error al borrar imagen");
     }
   };
 
-  if (loading) return <p>Cargando producto...</p>;
-  if (error) return <p className="error-popup">{error}</p>;
+  if (loading) {
+    return <p>Cargando producto...</p>;
+  }
+
+  if (error) {
+    return <p className="error-popup">{error}</p>;
+  }
 
   return (
     <div className="detalle-container">
@@ -126,8 +149,7 @@ export default function DetalleProductoAdminPage() {
         </div>
       </div>
 
-      {/* Formulario principal */}
-      <form className="form-section">
+      <form className="form-section" onSubmit={(e) => e.preventDefault()}>
         <div>
           <label>Nombre</label>
           <input
@@ -174,7 +196,6 @@ export default function DetalleProductoAdminPage() {
         </div>
       </form>
 
-      {/* Gestión de imágenes */}
       {id && (
         <div className="form-section">
           <div className="flex items-center gap-2 mb-4">
@@ -182,17 +203,17 @@ export default function DetalleProductoAdminPage() {
             <h2 className="text-xl font-bold text-gray-900">Imágenes</h2>
           </div>
           <div className="imagenes-grid">
-            {imagenes.map((img) => (
-              <div key={img.id} className="imagen-item">
+            {imagenes.map((imagen) => (
+              <div key={imagen.id} className="imagen-item">
                 <img
-                  src={img.url_imagen} // ✅ usamos directamente la URL completa
+                  src={imagen.url_imagen}
                   alt={formData.nombre}
                   className="imagen-preview"
                 />
                 <button
                   type="button"
                   className="btn-delete"
-                  onClick={() => handleDeleteImage(img.id)}
+                  onClick={() => handleDeleteImage(imagen.id)}
                 >
                   <Trash2 className="w-4 h-4" /> Borrar
                 </button>

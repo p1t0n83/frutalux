@@ -1,11 +1,33 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import { createPageUrl } from "../utils";
 import { Users, Package, ShoppingBag, ArrowRight } from "lucide-react";
 import { getStatsAdmin, getPedidosRecientes } from "../services/adminService";
 import "../styles/PanelAdmin.css";
 
-/* ===== Componente auxiliar: tarjeta de estadísticas ===== */
+const ACCESOS_RAPIDOS = [
+  {
+    id: 1,
+    to: "/gestion-usuarios",
+    Icon: Users,
+    title: "Gestionar Usuarios",
+    text: "Ver, editar y administrar cuentas de usuarios"
+  },
+  {
+    id: 2,
+    to: "/gestion-productos",
+    Icon: Package,
+    title: "Gestionar Productos",
+    text: "Añadir, editar y controlar el catálogo"
+  },
+  {
+    id: 3,
+    to: "/gestion-pedidos",
+    Icon: ShoppingBag,
+    title: "Gestionar Pedidos",
+    text: "Seguimiento y actualización de pedidos"
+  }
+];
+
 function StatCard({ titulo, valor, Icon, color }) {
   return (
     <div className="stat-card">
@@ -18,10 +40,9 @@ function StatCard({ titulo, valor, Icon, color }) {
   );
 }
 
-/* ===== Componente auxiliar: accesos rápidos ===== */
 function QuickCard({ to, Icon, title, text }) {
   return (
-    <Link to={createPageUrl(to)}>
+    <Link to={to}>
       <div className="quick-card">
         <div className="quick-header">
           <Icon className="quick-icon" />
@@ -34,12 +55,11 @@ function QuickCard({ to, Icon, title, text }) {
   );
 }
 
-/* ===== Componente auxiliar: fila de pedido ===== */
 function PedidoRow({ pedido }) {
   return (
     <tr>
       <td>
-        <Link to={createPageUrl("DetallePedidoAdmin")} className="pedido-link">
+        <Link to={`/admin/pedidos/${pedido.id}`} className="pedido-link">
           {pedido.numero}
         </Link>
       </td>
@@ -74,23 +94,29 @@ export default function PanelAdmin() {
         setStats(statsData);
         setPedidosRecientes(pedidosData);
       } catch (err) {
+        console.error("Error al cargar datos del panel:", err);
         setError("Error al cargar datos del panel");
       } finally {
         setLoading(false);
       }
     };
+
     cargarDatos();
   }, []);
 
-  if (loading) return <p className="loading">Cargando panel...</p>;
-  if (error) return <p className="error-popup">{error}</p>;
+  if (loading) {
+    return <p className="loading">Cargando panel...</p>;
+  }
+
+  if (error) {
+    return <p className="error-popup">{error}</p>;
+  }
 
   return (
     <div className="panel-container">
       <div className="panel-wrapper">
         <h1 className="panel-title">Panel de Administración</h1>
 
-        {/* Stats */}
         <div className="stats-grid">
           {stats.map((stat) => (
             <StatCard
@@ -103,29 +129,18 @@ export default function PanelAdmin() {
           ))}
         </div>
 
-        {/* Accesos Rápidos */}
         <div className="quick-grid">
-          <QuickCard
-            to="Gestion-Usuarios"
-            Icon={Users}
-            title="Gestionar Usuarios"
-            text="Ver, editar y administrar cuentas de usuarios"
-          />
-          <QuickCard
-            to="Gestion-Productos"
-            Icon={Package}
-            title="Gestionar Productos"
-            text="Añadir, editar y controlar el catálogo"
-          />
-          <QuickCard
-            to="Gestion-Pedidos"
-            Icon={ShoppingBag}
-            title="Gestionar Pedidos"
-            text="Seguimiento y actualización de pedidos"
-          />
+          {ACCESOS_RAPIDOS.map((acceso) => (
+            <QuickCard
+              key={acceso.id}
+              to={acceso.to}
+              Icon={acceso.Icon}
+              title={acceso.title}
+              text={acceso.text}
+            />
+          ))}
         </div>
 
-        {/* Actividad Reciente */}
         <div className="pedidos-card">
           <h2 className="pedidos-title">Pedidos Recientes</h2>
           <div className="pedidos-table-wrapper">

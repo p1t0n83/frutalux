@@ -1,5 +1,4 @@
-// src/components/AppMenu.jsx
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import "../styles/AppMenu.css";
 import { userAuthContext } from "../context/AuthContext";
@@ -12,30 +11,35 @@ export default function AppMenu() {
   const location = useLocation();
   const [menuOpen, setMenuOpen] = useState(false);
 
+  const itemCount = carrito?.items?.length || 0;
+
   const handleLogout = async () => {
     await logout();
-    setMenuOpen(false);
+    closeMenu();
     navigate("/login");
+  };
+
+  const closeMenu = () => {
+    setMenuOpen(false);
+  };
+
+  const toggleMenu = () => {
+    setMenuOpen(!menuOpen);
   };
 
   // Cerrar menú al cambiar de ruta
   useEffect(() => {
-    setMenuOpen(false);
+    closeMenu();
   }, [location.pathname]);
 
-  // Prevenir scroll cuando el menú está abierto
+  // Bloquear scroll cuando el menú está abierto
   useEffect(() => {
-    if (menuOpen) {
-      document.body.style.overflow = 'hidden';
-    } else {
-      document.body.style.overflow = 'unset';
-    }
+    document.body.style.overflow = menuOpen ? 'hidden' : 'unset';
+    
     return () => {
       document.body.style.overflow = 'unset';
     };
   }, [menuOpen]);
-
-  const itemCount = carrito?.items?.length || 0;
 
   return (
     <header className="menu-header">
@@ -44,10 +48,9 @@ export default function AppMenu() {
           <img src="/img/logo-texto.jpg" alt="Frutalux logo" className="logo-img" />
         </Link>
 
-        {/* Botón hamburguesa */}
         <button
           className={`menu-toggle ${menuOpen ? 'open' : ''}`}
-          onClick={() => setMenuOpen(!menuOpen)}
+          onClick={toggleMenu}
           aria-label="Toggle menu"
         >
           <span></span>
@@ -55,7 +58,6 @@ export default function AppMenu() {
           <span></span>
         </button>
 
-        {/* Menú desktop (oculto en móvil) */}
         <nav className="menu-desktop">
           <Link to="/" className="menu-link">INICIO</Link>
           <Link to="/catalogo" className="menu-link">CATÁLOGO</Link>
@@ -87,32 +89,30 @@ export default function AppMenu() {
         </nav>
       </div>
 
-      {/* Overlay oscuro */}
       <div
         className={`menu-mobile-overlay ${menuOpen ? 'open' : ''}`}
-        onClick={() => setMenuOpen(false)}
+        onClick={closeMenu}
       />
 
-      {/* Menú móvil lateral */}
       <nav className={`menu-mobile ${menuOpen ? 'open' : ''}`}>
         <div className="menu-mobile-list">
-          <Link to="/" className="menu-link" onClick={() => setMenuOpen(false)}>
+          <Link to="/" className="menu-link" onClick={closeMenu}>
             INICIO
           </Link>
 
-          <Link to="/catalogo" className="menu-link" onClick={() => setMenuOpen(false)}>
+          <Link to="/catalogo" className="menu-link" onClick={closeMenu}>
             CATÁLOGO
           </Link>
 
-          <Link to="/agricultores" className="menu-link" onClick={() => setMenuOpen(false)}>
+          <Link to="/agricultores" className="menu-link" onClick={closeMenu}>
             AGRICULTORES
           </Link>
 
-          <Link to="/suscripciones" className="menu-link" onClick={() => setMenuOpen(false)}>
+          <Link to="/suscripciones" className="menu-link" onClick={closeMenu}>
             SUSCRIPCIONES
           </Link>
 
-          <Link to="/carrito" className="menu-link carrito-link" onClick={() => setMenuOpen(false)}>
+          <Link to="/carrito" className="menu-link carrito-link" onClick={closeMenu}>
             CARRITO
             {itemCount > 0 && (
               <span className="cart-count">{itemCount}</span>
@@ -120,13 +120,13 @@ export default function AppMenu() {
           </Link>
 
           {isLoggedIn && (
-            <Link to="/perfil" className="menu-link" onClick={() => setMenuOpen(false)}>
+            <Link to="/perfil" className="menu-link" onClick={closeMenu}>
               MI PERFIL
             </Link>
           )}
 
           {isLoggedIn && tipoUsuario === "administrador" && (
-            <Link to="/admin" className="menu-link" onClick={() => setMenuOpen(false)}>
+            <Link to="/admin" className="menu-link" onClick={closeMenu}>
               ADMIN
             </Link>
           )}
@@ -134,7 +134,7 @@ export default function AppMenu() {
           <div className="menu-mobile-divider"></div>
 
           {!isLoggedIn ? (
-            <Link to="/login" className="menu-link menu-link-primary" onClick={() => setMenuOpen(false)}>
+            <Link to="/login" className="menu-link menu-link-primary" onClick={closeMenu}>
               INICIAR SESIÓN
             </Link>
           ) : (

@@ -1,25 +1,40 @@
-// src/pages/LoginPage.jsx
-import React, { useState } from "react";
+import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { Mail, Lock } from "lucide-react";
-import { userAuthContext } from "../context/AuthContext"; // 👈 usamos el contexto
-import "../styles/Registro.css"; // mismo estilo que registro
+import { userAuthContext } from "../context/AuthContext";
+import "../styles/Registro.css";
+
+const FORM_INICIAL = {
+  email: "",
+  password: ""
+};
 
 export default function LoginPage() {
-  const [formData, setFormData] = useState({ email: "", password: "" });
-  const [error, setError] = useState(null);
   const navigate = useNavigate();
+  const { login } = userAuthContext();
 
-  const { login } = userAuthContext(); // 👈 obtenemos login del contexto
+  const [formData, setFormData] = useState(FORM_INICIAL);
+  const [error, setError] = useState(null);
+  const [loading, setLoading] = useState(false);
+
+  const handleInputChange = (campo, valor) => {
+    setFormData({ ...formData, [campo]: valor });
+    if (error) setError(null);
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setLoading(true);
+    setError(null);
+
     try {
-      await login(formData); // login ya guarda token y usuario en el contexto
-      navigate("/perfil");   // redirigir tras login
+      await login(formData);
+      navigate("/perfil");
     } catch (err) {
+      console.error("Error en login:", err);
       setError("Credenciales inválidas");
-      console.error("Error login:", err);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -42,11 +57,10 @@ export default function LoginPage() {
               <input
                 type="email"
                 value={formData.email}
-                onChange={(e) =>
-                  setFormData({ ...formData, email: e.target.value })
-                }
+                onChange={(e) => handleInputChange("email", e.target.value)}
                 placeholder="juan@email.com"
                 required
+                disabled={loading}
               />
             </div>
           </div>
@@ -58,16 +72,17 @@ export default function LoginPage() {
               <input
                 type="password"
                 value={formData.password}
-                onChange={(e) =>
-                  setFormData({ ...formData, password: e.target.value })
-                }
+                onChange={(e) => handleInputChange("password", e.target.value)}
                 placeholder="••••••••"
                 required
+                disabled={loading}
               />
             </div>
           </div>
 
-          <button type="submit" className="btn-submit">ENTRAR</button>
+          <button type="submit" className="btn-submit" disabled={loading}>
+            {loading ? "ENTRANDO..." : "ENTRAR"}
+          </button>
 
           <div className="login-link">
             ¿No tienes cuenta? <Link to="/registro">Regístrate aquí</Link>

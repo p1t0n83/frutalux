@@ -1,36 +1,44 @@
-import React from "react";
+import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { MapPin } from "lucide-react";
-import { getProductos } from "../services/productoService"; // 👈 import correcto
+import { getProductos } from "../services/productoService";
 import "../styles/CatalogoPage.css";
 
-export default function CatalogoPage() {
-  const [productos, setProductos] = React.useState([]);
-  const [searchTerm, setSearchTerm] = React.useState("");
-  const [selectedCategory, setSelectedCategory] = React.useState("all");
+const CATEGORIAS = ["all", "Frutas con hueso", "Verduras", "Hortalizas", "Legumbres", "Cítricos"];
 
-  React.useEffect(() => {
-    getProductos() // 👈 usamos getProductos del nuevo servicio
-      .then(setProductos)
-      .catch((err) => {
-        console.error("Error cargando productos:", err);
-      });
+export default function CatalogoPage() {
+  const [productos, setProductos] = useState([]);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [selectedCategory, setSelectedCategory] = useState("all");
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const cargarProductos = async () => {
+      try {
+        const data = await getProductos();
+        setProductos(data);
+      } catch (error) {
+        console.error("Error cargando productos:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    cargarProductos();
   }, []);
 
-  const filteredProducts = productos.filter((p) => {
-    const nombre = (p.nombre || "").toLowerCase();
-    const productor = (p.nombre_productor || p.productor || "").toLowerCase();
-    const origen = (p.origen || "").toLowerCase();
+  const filteredProducts = productos.filter((producto) => {
+    const nombre = (producto.nombre || "").toLowerCase();
+    const productor = (producto.nombre_productor || producto.productor || "").toLowerCase();
+    const origen = (producto.origen || "").toLowerCase();
 
     const matchesSearch =
       nombre.includes(searchTerm.toLowerCase()) ||
       productor.includes(searchTerm.toLowerCase()) ||
       origen.includes(searchTerm.toLowerCase());
 
-    let categoriaNombre = (p.categoria?.nombre || "").toLowerCase();
-    if (categoriaNombre.includes("fruta")) {
-      categoriaNombre = "frutas";
-    }
+    let categoriaNombre = (producto.categoria?.nombre || "").toLowerCase();
+  
 
     const matchesCategory =
       selectedCategory === "all" ||
@@ -39,12 +47,15 @@ export default function CatalogoPage() {
     return matchesSearch && matchesCategory;
   });
 
+  if (loading) {
+    return <p>Cargando productos...</p>;
+  }
+
   return (
     <div className="catalogo-container">
       <div className="section-content">
         <h1 className="catalogo-title">Catálogo de Productos</h1>
 
-        {/* Buscador */}
         <div className="search-box">
           <input
             type="text"
@@ -55,53 +66,50 @@ export default function CatalogoPage() {
           />
         </div>
 
-        {/* Filtros */}
         <div className="filter-buttons">
-          {["all", "Frutas", "Verduras", "Hortalizas", "Legumbres", "Cítricos"].map((cat) => (
+          {CATEGORIAS.map((categoria) => (
             <button
-              key={cat}
-              onClick={() => setSelectedCategory(cat)}
-              className={`filter-btn ${selectedCategory === cat ? "active" : ""}`}
+              key={categoria}
+              onClick={() => setSelectedCategory(categoria)}
+              className={`filter-btn ${selectedCategory === categoria ? "active" : ""}`}
             >
-              {cat === "all" ? "Todas" : cat}
+              {categoria === "all" ? "Todas" : categoria}
             </button>
           ))}
         </div>
 
-        {/* Grid */}
         <div className="products-grid">
-          {filteredProducts.map((prod, i) => {
-            const portada =
-              prod.imagenes && prod.imagenes.length > 0
-                ? prod.imagenes[0].url_imagen
+          {filteredProducts.map((producto) => {
+            const imagenPortada =
+              producto.imagenes && producto.imagenes.length > 0
+                ? producto.imagenes[0].url_imagen
                 : "/images/default-product.jpg";
 
             return (
-              <Link key={i} to={`/producto/${prod.id}`} className="product-link">
-
+              <Link key={producto.id} to={`/producto/${producto.id}`} className="product-link">
                 <div className="product-card">
                   <div className="product-image">
                     <img
-                      src={portada}
-                      alt={prod.nombre || "Imagen de producto"}
+                      src={imagenPortada}
+                      alt={producto.nombre || "Imagen de producto"}
                       className="product-cover"
                     />
                   </div>
                   <div className="product-info">
-                    <h3 className="product-name">{prod.nombre || "Sin nombre"}</h3>
+                    <h3 className="product-name">{producto.nombre || "Sin nombre"}</h3>
                     <p className="product-producer">
-                      {prod.nombre_productor || prod.productor || "Productor desconocido"}
+                      {producto.nombre_productor || producto.productor || "Productor desconocido"}
                     </p>
                     <div className="product-origin">
                       <MapPin className="icon-small" />
-                      <span>{prod.origen || "Origen no especificado"}</span>
+                      <span>{producto.origen || "Origen no especificado"}</span>
                     </div>
                     <p className="product-category">
-                      {prod.categoria?.nombre || "Sin categoría"}
+                      {producto.categoria?.nombre || "Sin categoría"}
                     </p>
                     <div className="product-price-box">
                       <span className="product-price">
-                        €{prod.precio_kg || prod.precio || 0}
+                        €{producto.precio_kg || producto.precio || 0}
                       </span>
                       <span className="product-unit">/kg</span>
                     </div>

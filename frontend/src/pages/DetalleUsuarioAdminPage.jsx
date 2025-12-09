@@ -1,64 +1,75 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
-import { createPageUrl } from "../utils";
 import { ArrowLeft, Save, Trash2 } from "lucide-react";
 import { getUsuario, createUsuario, updateUsuario, deleteUsuario } from "../services/usuarioService";
 import "../styles/DetalleUsuarioAdmin.css";
 
+const FORM_INICIAL = {
+  nombre: "",
+  apellidos: "",
+  email: "",
+  password: "",
+  telefono: "",
+  direccion: "",
+  codigo_postal: "",
+  localidad: "",
+  provincia: "",
+  tipo_usuario: "cliente",
+  activo: true
+};
+
+const TIPOS_USUARIO = [
+  { value: "cliente", label: "Cliente" },
+  { value: "admin", label: "Administrador" }
+];
+
 export default function DetalleUsuarioAdmin() {
-  const { id } = useParams(); // si existe, estamos editando
+  const { id } = useParams();
   const navigate = useNavigate();
 
-  const [formData, setFormData] = useState({
-    nombre: "",
-    apellidos: "",
-    email: "",
-    password: "", // solo se usa en creación
-    telefono: "",
-    direccion: "",
-    codigo_postal: "",
-    localidad: "",
-    provincia: "",
-    tipo_usuario: "cliente",
-    activo: true
-  });
-
+  const [formData, setFormData] = useState(FORM_INICIAL);
   const [validationErrors, setValidationErrors] = useState({});
   const [loading, setLoading] = useState(!!id);
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    if (id) {
-      const cargarUsuario = async () => {
-        try {
-          const data = await getUsuario(id);
-          setFormData({ ...data, password: "" }); // no mostrar password
-        } catch (err) {
-          setError("Error al cargar usuario");
-        } finally {
-          setLoading(false);
-        }
-      };
-      cargarUsuario();
-    }
+    if (!id) return;
+
+    const cargarUsuario = async () => {
+      try {
+        const data = await getUsuario(id);
+        setFormData({ ...data, password: "" });
+      } catch (err) {
+        console.error("Error al cargar usuario:", err);
+        setError("Error al cargar usuario");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    cargarUsuario();
   }, [id]);
 
   const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
-    setValidationErrors({ ...validationErrors, [e.target.name]: null }); // limpiar error al escribir
+    const { name, value } = e.target;
+    setFormData({ ...formData, [name]: value });
+    setValidationErrors({ ...validationErrors, [name]: null });
   };
 
-  const handleSave = async () => {
+  const validarFormulario = () => {
     const errors = {};
+    
     if (!formData.nombre) errors.nombre = "El nombre es obligatorio";
     if (!formData.apellidos) errors.apellidos = "Los apellidos son obligatorios";
     if (!formData.email) errors.email = "El email es obligatorio";
     if (!id && !formData.password) errors.password = "La contraseña es obligatoria";
 
-    if (Object.keys(errors).length > 0) {
-      setValidationErrors(errors);
-      return;
-    }
+    setValidationErrors(errors);
+    return Object.keys(errors).length === 0;
+  };
+
+  const handleSave = async () => {
+    if (!validarFormulario()) return;
 
     try {
       if (id) {
@@ -66,30 +77,44 @@ export default function DetalleUsuarioAdmin() {
       } else {
         await createUsuario(formData);
       }
-      navigate(createPageUrl("gestion-usuarios"));
+      navigate("/gestion-usuarios");
     } catch (err) {
+      console.error("Error al guardar usuario:", err);
       setError("Error al guardar usuario");
     }
   };
 
   const handleDelete = async () => {
+    if (!window.confirm("¿Estás seguro de eliminar este usuario?")) {
+      return;
+    }
+
     try {
       await deleteUsuario(id);
-      navigate(createPageUrl("gestion-usuarios"));
+      navigate("/gestion-usuarios");
     } catch (err) {
+      console.error("Error al eliminar usuario:", err);
       setError("Error al eliminar usuario");
     }
   };
 
-  if (loading) return <p className="loading">Cargando usuario...</p>;
-  if (error) return <p className="error-popup">{error}</p>;
+  const handleActivoChange = (e) => {
+    setFormData({ ...formData, activo: e.target.value === "true" });
+  };
+
+  if (loading) {
+    return <p className="loading">Cargando usuario...</p>;
+  }
+
+  if (error) {
+    return <p className="error-popup">{error}</p>;
+  }
 
   return (
     <div className="detalle-container">
       <div className="detalle-wrapper">
-        {/* Header */}
         <div className="detalle-header">
-          <Link to={createPageUrl("gestion-usuarios")}>
+          <Link to="/gestion-usuarios">
             <button className="btn-back">
               <ArrowLeft className="w-6 h-6" />
             </button>
@@ -109,7 +134,6 @@ export default function DetalleUsuarioAdmin() {
           </div>
         </div>
 
-        {/* Formulario */}
         <div className="form-card">
           <div className="form-grid">
             <div>
@@ -124,6 +148,7 @@ export default function DetalleUsuarioAdmin() {
                 <p className="error-text">{validationErrors.nombre}</p>
               )}
             </div>
+
             <div>
               <label>Apellidos</label>
               <input
@@ -136,6 +161,7 @@ export default function DetalleUsuarioAdmin() {
                 <p className="error-text">{validationErrors.apellidos}</p>
               )}
             </div>
+
             <div>
               <label>Email</label>
               <input
@@ -149,6 +175,7 @@ export default function DetalleUsuarioAdmin() {
                 <p className="error-text">{validationErrors.email}</p>
               )}
             </div>
+
             {!id && (
               <div>
                 <label>Contraseña</label>
@@ -164,41 +191,73 @@ export default function DetalleUsuarioAdmin() {
                 )}
               </div>
             )}
+
             <div>
               <label>Teléfono</label>
-              <input name="telefono" value={formData.telefono} onChange={handleChange} />
+              <input 
+                name="telefono" 
+                value={formData.telefono} 
+                onChange={handleChange} 
+              />
             </div>
+
             <div>
               <label>Dirección</label>
-              <input name="direccion" value={formData.direccion} onChange={handleChange} />
+              <input 
+                name="direccion" 
+                value={formData.direccion} 
+                onChange={handleChange} 
+              />
             </div>
+
             <div>
               <label>Código Postal</label>
-              <input name="codigo_postal" value={formData.codigo_postal} onChange={handleChange} />
+              <input 
+                name="codigo_postal" 
+                value={formData.codigo_postal} 
+                onChange={handleChange} 
+              />
             </div>
+
             <div>
               <label>Localidad</label>
-              <input name="localidad" value={formData.localidad} onChange={handleChange} />
+              <input 
+                name="localidad" 
+                value={formData.localidad} 
+                onChange={handleChange} 
+              />
             </div>
+
             <div>
               <label>Provincia</label>
-              <input name="provincia" value={formData.provincia} onChange={handleChange} />
+              <input 
+                name="provincia" 
+                value={formData.provincia} 
+                onChange={handleChange} 
+              />
             </div>
+
             <div>
               <label>Tipo de Usuario</label>
-              <select name="tipo_usuario" value={formData.tipo_usuario} onChange={handleChange}>
-                <option value="cliente">Cliente</option>
-                <option value="admin">Administrador</option>
+              <select 
+                name="tipo_usuario" 
+                value={formData.tipo_usuario} 
+                onChange={handleChange}
+              >
+                {TIPOS_USUARIO.map((tipo) => (
+                  <option key={tipo.value} value={tipo.value}>
+                    {tipo.label}
+                  </option>
+                ))}
               </select>
             </div>
+
             <div>
               <label>Estado</label>
               <select
                 name="activo"
                 value={formData.activo}
-                onChange={(e) =>
-                  setFormData({ ...formData, activo: e.target.value === "true" })
-                }
+                onChange={handleActivoChange}
               >
                 <option value="true">Activo</option>
                 <option value="false">Inactivo</option>

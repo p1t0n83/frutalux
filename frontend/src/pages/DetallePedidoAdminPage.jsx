@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { Link, useParams } from "react-router-dom";
 import { ArrowLeft, User, MapPin, CreditCard, Clock, FileText } from "lucide-react";
 import { getPedidoById } from "../services/pedidoService";
@@ -8,6 +8,7 @@ export default function DetallePedidoAdminPage() {
   const { id } = useParams();
   const [pedido, setPedido] = useState(null);
   const [error, setError] = useState(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const cargarPedido = async () => {
@@ -15,27 +16,48 @@ export default function DetallePedidoAdminPage() {
         const data = await getPedidoById(id);
         setPedido(data);
       } catch (err) {
+        console.error("Error al cargar pedido:", err);
         setError("Error al cargar pedido");
+      } finally {
+        setLoading(false);
       }
     };
+
     cargarPedido();
   }, [id]);
 
-  if (error) return <p className="error-popup">{error}</p>;
-  if (!pedido) return <p>Cargando pedido...</p>;
-
-  const fechaPedido = pedido.created_at
-    ? new Date(pedido.created_at).toLocaleDateString("es-ES", {
+  const formatearFecha = (fecha) => {
+    if (!fecha) return "";
+    return new Date(fecha).toLocaleDateString("es-ES", {
       day: "2-digit",
       month: "2-digit",
       year: "numeric",
-    })
-    : "";
+    });
+  };
+
+  const abrirFactura = () => {
+    if (pedido?.factura_url) {
+      window.open(pedido.factura_url, "_blank");
+    }
+  };
+
+  if (loading) {
+    return <p>Cargando pedido...</p>;
+  }
+
+  if (error) {
+    return <p className="error-popup">{error}</p>;
+  }
+
+  if (!pedido) {
+    return <p>No se encontró el pedido</p>;
+  }
+
+  const fechaPedido = formatearFecha(pedido.created_at);
 
   return (
     <div className="detalle-pedido-container">
       <div className="detalle-pedido-wrapper">
-        {/* Header */}
         <div className="detalle-header">
           <div className="detalle-header-left">
             <Link to="/gestion-pedidos">
@@ -48,13 +70,10 @@ export default function DetallePedidoAdminPage() {
               <p className="detalle-subtitle">Realizado el {fechaPedido}</p>
             </div>
           </div>
+          
           <div className="detalle-header-right">
-            {/* Botón ver factura */}
             {pedido.factura_url && (
-              <button
-                className="btn-factura"
-                onClick={() => window.open(pedido.factura_url, "_blank")}
-              >
+              <button className="btn-factura" onClick={abrirFactura}>
                 <FileText className="w-5 h-5" /> VER FACTURA
               </button>
             )}
@@ -62,9 +81,7 @@ export default function DetallePedidoAdminPage() {
         </div>
 
         <div className="detalle-grid">
-          {/* Info Principal */}
           <div className="detalle-main">
-            {/* Cliente */}
             <div className="detalle-card">
               <div className="detalle-card-header">
                 <User className="icon-green" />
@@ -76,7 +93,6 @@ export default function DetallePedidoAdminPage() {
               </div>
             </div>
 
-            {/* Dirección */}
             <div className="detalle-card">
               <div className="detalle-card-header">
                 <MapPin className="icon-green" />
@@ -87,7 +103,6 @@ export default function DetallePedidoAdminPage() {
               </div>
             </div>
 
-            {/* Pago */}
             <div className="detalle-card">
               <div className="detalle-card-header">
                 <CreditCard className="icon-green" />
@@ -95,12 +110,14 @@ export default function DetallePedidoAdminPage() {
               </div>
               <div className="detalle-card-body">
                 <p><strong>Método:</strong> {pedido.metodo_pago || "No especificado"}</p>
-                <p><strong>Estado:</strong> <span className="pill pill-green">{pedido.estado}</span></p>
+                <p>
+                  <strong>Estado:</strong> 
+                  <span className="pill pill-green">{pedido.estado}</span>
+                </p>
               </div>
             </div>
           </div>
 
-          {/* Sidebar */}
           <div className="detalle-sidebar">
             <div className="detalle-card">
               <h3>Resumen del Pedido</h3>
@@ -127,9 +144,9 @@ export default function DetallePedidoAdminPage() {
                   <h3>Estado del Pedido</h3>
                 </div>
                 <div className="detalle-timeline">
-                  {pedido.timeline.map((item, i) => (
-                    <div key={i} className="timeline-item">
-                      <div className={`timeline-dot ${i === 0 ? 'dot-blue' : 'dot-gray'}`}></div>
+                  {pedido.timeline.map((item, index) => (
+                    <div key={index} className="timeline-item">
+                      <div className={`timeline-dot ${index === 0 ? 'dot-blue' : 'dot-gray'}`}></div>
                       <div className="timeline-info">
                         <p className="timeline-date">{item.fecha}</p>
                         <p className="timeline-event">{item.evento}</p>

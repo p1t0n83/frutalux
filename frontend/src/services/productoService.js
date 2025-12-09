@@ -12,76 +12,103 @@ async function safeJson(res) {
     throw new Error("Respuesta no válida: " + text);
   }
 }
+
+/**
+ * Función centralizada para hacer peticiones a la API
+ */
+async function apiFetch(endpoint, options = {}) {
+  const res = await fetch(`${API_BASE}${endpoint}`, {
+    ...options,
+    headers: {
+      "Accept": "application/json",
+      ...options.headers,
+    },
+  });
+  
+  const json = await safeJson(res);
+  if (!res.ok) throw new Error(json.message || options.errorMessage || "Error en la petición");
+  return json;
+}
+
+/**
+ * Función para peticiones autenticadas
+ */
+async function apiFetchAuth(endpoint, options = {}) {
+  return apiFetch(endpoint, {
+    ...options,
+    headers: {
+      Authorization: `Bearer ${getToken()}`,
+      ...options.headers,
+    },
+  });
+}
+
+/**
+ * Función para peticiones DELETE sin respuesta JSON
+ */
+async function apiFetchDelete(endpoint, options = {}) {
+  const res = await fetch(`${API_BASE}${endpoint}`, {
+    method: "DELETE",
+    ...options,
+    headers: {
+      "Accept": "application/json",
+      Authorization: `Bearer ${getToken()}`,
+      ...options.headers,
+    },
+  });
+  
+  if (!res.ok) throw new Error(options.errorMessage || "Error en la petición");
+}
+
 /* ============================
    LISTAR TODOS LOS PRODUCTOS
    ============================ */
 export async function getProductos() {
-  const res = await fetch(`${API_BASE}/productos`, {
-    headers: { "Accept": "application/json" }
+  return apiFetch("/productos", {
+    errorMessage: "Error al obtener productos"
   });
-  const json = await safeJson(res);
-  if (!res.ok) throw new Error(json.message || "Error al obtener productos");
-  return json;
 }
 
 /* ============================
    OBTENER UN PRODUCTO POR ID
    ============================ */
 export async function getProducto(id) {
-  const res = await fetch(`${API_BASE}/productos/${id}`, {
-    headers: { "Accept": "application/json" }
+  return apiFetch(`/productos/${id}`, {
+    errorMessage: "Error al obtener producto"
   });
-  const json = await safeJson(res);
-  if (!res.ok) throw new Error("Error al obtener producto");
-  return json;
 }
-
 
 /* ============================
    CREAR PRODUCTO
    ============================ */
 export async function createProducto(data) {
-  const res = await fetch(`${API_BASE}/productos`, {
+  return apiFetchAuth("/productos", {
     method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      "Accept": "application/json",
-      Authorization: `Bearer ${getToken()}`
-    },
-    body: JSON.stringify(data)
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(data),
+    errorMessage: "Error al crear producto"
   });
-  const json = await safeJson(res);
-  if (!res.ok) throw new Error("Error al crear producto");
-  return json;
 }
 
 /* ============================
    ACTUALIZAR PRODUCTO
    ============================ */
 export async function updateProducto(id, data) {
-  const res = await fetch(`${API_BASE}/productos/${id}`, {
+  return apiFetchAuth(`/productos/${id}`, {
     method: "PUT",
-    headers: {
-      "Content-Type": "application/json",
-      "Accept": "application/json",
-      Authorization: `Bearer ${getToken()}`
-    },
-    body: JSON.stringify(data)
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(data),
+    errorMessage: "Error al actualizar producto"
   });
-  const json = await safeJson(res);
-  if (!res.ok) throw new Error("Error al actualizar producto");
-  return json;
 }
 
 /* ============================
    BORRAR PRODUCTO
    ============================ */
 export async function deleteProducto(id) {
-  const res = await fetch(`${API_BASE}/productos/${id}`, {
-    method: "DELETE",
-    headers: { "Accept": "application/json", Authorization: `Bearer ${getToken()}` }
+  return apiFetchDelete(`/productos/${id}`, {
+    errorMessage: "Error al borrar producto"
   });
-  if (!res.ok) throw new Error("Error al borrar producto");
 }
 
 /* ============================
@@ -90,27 +117,20 @@ export async function deleteProducto(id) {
 export async function addProductoImagen(id, file) {
   const formData = new FormData();
   formData.append("imagen", file);
-
-  const res = await fetch(`${API_BASE}/productos/${id}/imagenes`, {
+  
+  return apiFetchAuth(`/productos/${id}/imagenes`, {
     method: "POST",
-    headers: {
-      Authorization: `Bearer ${getToken()}`
-      // 👆 no ponemos Content-Type, fetch lo gestiona con FormData
-    },
-    body: formData
+    headers: {}, // Sin Content-Type, fetch lo gestiona con FormData
+    body: formData,
+    errorMessage: "Error al subir imagen"
   });
-  const json = await safeJson(res);
-  if (!res.ok) throw new Error("Error al subir imagen");
-  return json;
 }
 
 /* ============================
    BORRAR IMAGEN DE PRODUCTO
    ============================ */
 export async function deleteProductoImagen(id, imagenId) {
-  const res = await fetch(`${API_BASE}/productos/${id}/imagenes/${imagenId}`, {
-    method: "DELETE",
-    headers: { "Accept": "application/json", Authorization: `Bearer ${getToken()}` }
+  return apiFetchDelete(`/productos/${id}/imagenes/${imagenId}`, {
+    errorMessage: "Error al borrar imagen"
   });
-  if (!res.ok) throw new Error("Error al borrar imagen");
 }

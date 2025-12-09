@@ -14,89 +14,73 @@ async function safeJson(res) {
 }
 
 /**
- * Obtener carrito del usuario autenticado
+ * Función centralizada para hacer peticiones a la API
  */
-export async function getCarrito() {
+async function apiFetch(endpoint, options = {}) {
   const token = getToken();
-  const res = await fetch(`${API_BASE}/carrito`, {
+  const res = await fetch(`${API_BASE}${endpoint}`, {
+    ...options,
     headers: {
       "Accept": "application/json",
+      ...options.headers,
       Authorization: `Bearer ${token}`,
     },
   });
+  
   const json = await safeJson(res);
-  if (!res.ok) throw new Error(json.message || "Error al obtener carrito");
+  if (!res.ok) throw new Error(json.message || options.errorMessage || "Error en la petición");
   return json;
+}
+
+/**
+ * Obtener carrito del usuario autenticado
+ */
+export async function getCarrito() {
+  return apiFetch("/carrito", {
+    errorMessage: "Error al obtener carrito"
+  });
 }
 
 /**
  * Añadir producto al carrito
  */
 export async function addItem({ producto_id, cantidad_kg, precio_unitario }) {
-  const token = getToken();
-  const res = await fetch(`${API_BASE}/carrito/add`, {
+  return apiFetch("/carrito/add", {
     method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      "Accept": "application/json",
-      Authorization: `Bearer ${token}`,
-    },
+    headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ producto_id, cantidad_kg, precio_unitario }),
+    errorMessage: "Error al añadir producto"
   });
-  const json = await safeJson(res);
-  if (!res.ok) throw new Error(json.message || "Error al añadir producto");
-  return json;
 }
 
 /**
  * Actualizar cantidad de un producto en el carrito
  */
 export async function updateItem(itemId, cantidad_kg) {
-  const token = getToken();
-  const res = await fetch(`${API_BASE}/carrito/items/${itemId}`, {
+  return apiFetch(`/carrito/items/${itemId}`, {
     method: "PUT",
-    headers: {
-      "Content-Type": "application/json",
-      "Accept": "application/json",
-      Authorization: `Bearer ${token}`,
-    },
+    headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ cantidad_kg }),
+    errorMessage: "Error al actualizar producto"
   });
-  const json = await safeJson(res);
-  if (!res.ok) throw new Error(json.message || "Error al actualizar producto");
-  return json;
 }
 
 /**
  * Eliminar producto del carrito
  */
 export async function removeItem(itemId) {
-  const token = getToken();
-  const res = await fetch(`${API_BASE}/carrito/items/${itemId}`, {
+  return apiFetch(`/carrito/items/${itemId}`, {
     method: "DELETE",
-    headers: {
-      "Accept": "application/json",
-      Authorization: `Bearer ${token}`,
-    },
+    errorMessage: "Error al eliminar producto"
   });
-  const json = await safeJson(res);
-  if (!res.ok) throw new Error(json.message || "Error al eliminar producto");
-  return json;
 }
 
 /**
  * Vaciar carrito entero
  */
 export async function clearCarrito() {
-  const token = getToken();
-  const res = await fetch(`${API_BASE}/carrito/clear`, {
+  return apiFetch("/carrito/clear", {
     method: "DELETE",
-    headers: {
-      "Accept": "application/json",
-      Authorization: `Bearer ${token}`,
-    },
+    errorMessage: "Error al vaciar carrito"
   });
-  const json = await safeJson(res);
-  if (!res.ok) throw new Error(json.message || "Error al vaciar carrito");
-  return json;
 }

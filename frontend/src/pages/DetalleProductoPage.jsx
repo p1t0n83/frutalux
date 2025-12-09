@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
 import {
   Star,
@@ -10,37 +10,62 @@ import {
   ChevronLeft,
   ChevronRight,
 } from "lucide-react";
-import { getProducto } from "../services/productoService"; // 👈 import correcto
+import { getProducto } from "../services/productoService";
 import { useCarrito } from "../context/CarritoContext";
 import "../styles/DetalleProducto.css";
 
+const CANTIDAD_MINIMA = 0.5;
+const CANTIDAD_INICIAL = 1;
+
 export default function DetalleProducto() {
   const { id } = useParams();
-  const [producto, setProducto] = useState(null);
-  const [cantidad, setCantidad] = useState(1);
-  const [currentIndex, setCurrentIndex] = useState(0);
-  const [mensaje, setMensaje] = useState("");
-
   const { addItem } = useCarrito();
 
+  const [producto, setProducto] = useState(null);
+  const [cantidad, setCantidad] = useState(CANTIDAD_INICIAL);
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const [mensaje, setMensaje] = useState("");
+  const [loading, setLoading] = useState(true);
+
   useEffect(() => {
-    getProducto(id) // 👈 usamos getProducto del nuevo servicio
-      .then(setProducto)
-      .catch((err) => console.error("Error cargando producto:", err));
+    const cargarProducto = async () => {
+      try {
+        const data = await getProducto(id);
+        setProducto(data);
+      } catch (error) {
+        console.error("Error cargando producto:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    cargarProducto();
   }, [id]);
 
-  if (!producto) return <p>Cargando producto...</p>;
+  const imagenes = producto?.imagenes || [];
+  const imagenActual = imagenes.length > 0 
+    ? imagenes[currentIndex].url_imagen 
+    : "/images/default-product.jpg";
 
-  const imagenes = producto.imagenes || [];
-  const portada =
-    imagenes.length > 0 ? imagenes[currentIndex].url_imagen : "/images/default-product.jpg";
-
-  const prevImage = () => {
-    setCurrentIndex((prev) => (prev === 0 ? imagenes.length - 1 : prev - 1));
+  const navegarImagenAnterior = () => {
+    setCurrentIndex((prevIndex) => 
+      prevIndex === 0 ? imagenes.length - 1 : prevIndex - 1
+    );
   };
 
-  const nextImage = () => {
-    setCurrentIndex((prev) => (prev === imagenes.length - 1 ? 0 : prev + 1));
+  const navegarImagenSiguiente = () => {
+    setCurrentIndex((prevIndex) => 
+      prevIndex === imagenes.length - 1 ? 0 : prevIndex + 1
+    );
+  };
+
+  const seleccionarImagen = (index) => {
+    setCurrentIndex(index);
+  };
+
+  const mostrarMensaje = (texto, duracion = 3000) => {
+    setMensaje(texto);
+    setTimeout(() => setMensaje(""), duracion);
   };
 
   const handleAddToCarrito = async () => {
@@ -50,28 +75,40 @@ export default function DetalleProducto() {
         cantidad_kg: parseFloat(cantidad),
         precio_unitario: producto.precio_kg,
       });
-      setMensaje("✅ Producto añadido al carrito");
-      setTimeout(() => setMensaje(""), 3000);
-    } catch (err) {
-      console.error("Error añadiendo al carrito:", err);
-      setMensaje("❌ No se pudo añadir al carrito");
-      setTimeout(() => setMensaje(""), 3000);
+      mostrarMensaje("✅ Producto añadido al carrito");
+    } catch (error) {
+      console.error("Error añadiendo al carrito:", error);
+      mostrarMensaje("❌ No se pudo añadir al carrito");
     }
   };
+
+  const handleCantidadChange = (e) => {
+    const nuevaCantidad = e.target.value;
+    if (nuevaCantidad >= CANTIDAD_MINIMA) {
+      setCantidad(nuevaCantidad);
+    }
+  };
+
+  if (loading) {
+    return <p>Cargando producto...</p>;
+  }
+
+  if (!producto) {
+    return <p>No se encontró el producto</p>;
+  }
 
   return (
     <div className="detalle-container">
       <div className="detalle-grid">
-        {/* Carrusel de imágenes */}
         <div className="detalle-images">
           <div className="detalle-main-image">
-            <img src={portada} alt={producto.nombre} className="detalle-cover" />
+            <img src={imagenActual} alt={producto.nombre} className="detalle-cover" />
             {imagenes.length > 1 && (
               <>
-                <button className="carousel-btn left" onClick={prevImage}>
+                <button className="carousel-btn left" onClick={navegarImagenAnterior}>
                   <ChevronLeft className="w-6 h-6" />
                 </button>
-                <button className="carousel-btn right" onClick={nextImage}>
+                <button className="carousel-btn right" onClick={navegarImagenSiguiente}>
                   <ChevronRight className="w-6 h-6" />
                 </button>
               </>
@@ -80,20 +117,19 @@ export default function DetalleProducto() {
 
           {imagenes.length > 1 && (
             <div className="detalle-thumbs">
-              {imagenes.map((img, i) => (
+              {imagenes.map((imagen, index) => (
                 <div
-                  key={i}
-                  className={`detalle-thumb ${i === currentIndex ? "active" : ""}`}
-                  onClick={() => setCurrentIndex(i)}
+                  key={imagen.id || index}
+                  className={`detalle-thumb ${index === currentIndex ? "active" : ""}`}
+                  onClick={() => seleccionarImagen(index)}
                 >
-                  <img src={img.url_imagen} alt={`${producto.nombre} ${i}`} />
+                  <img src={imagen.url_imagen} alt={`${producto.nombre} ${index + 1}`} />
                 </div>
               ))}
             </div>
           )}
         </div>
 
-        {/* Información */}
         <div className="detalle-info">
           <h1 className="detalle-title">{producto.nombre}</h1>
           <div className="detalle-location">
@@ -134,9 +170,9 @@ export default function DetalleProducto() {
               <input
                 type="number"
                 value={cantidad}
-                onChange={(e) => setCantidad(e.target.value)}
-                min="0.5"
-                step="0.5"
+                onChange={handleCantidadChange}
+                min={CANTIDAD_MINIMA}
+                step={CANTIDAD_MINIMA}
                 className="detalle-input"
               />
             </div>
@@ -146,7 +182,6 @@ export default function DetalleProducto() {
             </button>
           </div>
 
-          {/* Mensaje debajo del botón */}
           {mensaje && (
             <div className={mensaje.includes("✅") ? "mensaje-exito" : "mensaje-error"}>
               {mensaje}
@@ -155,24 +190,23 @@ export default function DetalleProducto() {
         </div>
       </div>
 
-      {/* Valoraciones */}
       <div className="detalle-reviews">
         <h2>Valoraciones de Clientes</h2>
         {producto.valoraciones?.length > 0 ? (
-          producto.valoraciones.map((val, i) => (
-            <div key={i} className="review-card">
+          producto.valoraciones.map((valoracion, index) => (
+            <div key={valoracion.id || index} className="review-card">
               <div className="review-header">
-                <span className="review-name">{val.nombre}</span>
+                <span className="review-name">{valoracion.nombre}</span>
                 <div className="review-stars">
-                  {[...Array(5)].map((_, idx) => (
+                  {[...Array(5)].map((_, starIndex) => (
                     <Star
-                      key={idx}
-                      className={idx < val.puntuacion ? "star-filled" : "star-empty"}
+                      key={starIndex}
+                      className={starIndex < valoracion.puntuacion ? "star-filled" : "star-empty"}
                     />
                   ))}
                 </div>
               </div>
-              <p className="review-text">{val.comentario}</p>
+              <p className="review-text">{valoracion.comentario}</p>
             </div>
           ))
         ) : (

@@ -1,15 +1,16 @@
-// src/pages/GestionProductosPage.jsx
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Search, PlusCircle, Eye, Trash2 } from "lucide-react";
 import { getProductos, deleteProducto } from "../services/productoService";
 import "../styles/GestionProductos.css";
 
 export default function GestionProductosPage() {
+  const navigate = useNavigate();
+  
   const [searchTerm, setSearchTerm] = useState("");
   const [productos, setProductos] = useState([]);
   const [error, setError] = useState(null);
-  const navigate = useNavigate();
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const cargarProductos = async () => {
@@ -17,37 +18,65 @@ export default function GestionProductosPage() {
         const data = await getProductos();
         setProductos(data);
       } catch (err) {
-        console.error(err);
+        console.error("Error al cargar productos:", err);
         setError("Error al cargar productos");
+      } finally {
+        setLoading(false);
       }
     };
+
     cargarProductos();
   }, []);
 
-  const filteredProductos = productos.filter(
-    (p) =>
-      p.nombre?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      p.origen?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      p.categoria?.nombre?.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const filteredProductos = productos.filter((producto) => {
+    const searchLower = searchTerm.toLowerCase();
+    return (
+      producto.nombre?.toLowerCase().includes(searchLower) ||
+      producto.origen?.toLowerCase().includes(searchLower) ||
+      producto.categoria?.nombre?.toLowerCase().includes(searchLower)
+    );
+  });
 
-  if (error) return <p className="error-popup">{error}</p>;
+  const handleEliminarProducto = async (productoId) => {
+    if (!window.confirm("¿Estás seguro de eliminar este producto?")) {
+      return;
+    }
+
+    try {
+      await deleteProducto(productoId);
+      setProductos((prevProductos) => 
+        prevProductos.filter((p) => p.id !== productoId)
+      );
+    } catch (err) {
+      console.error("Error al eliminar producto:", err);
+      setError("No se pudo eliminar el producto");
+      setTimeout(() => setError(null), 3000);
+    }
+  };
+
+  const handleNuevoProducto = () => {
+    navigate("/admin/productos/nuevo");
+  };
+
+  if (loading) {
+    return <p>Cargando productos...</p>;
+  }
+
+  if (error) {
+    return <p className="error-popup">{error}</p>;
+  }
 
   return (
     <div className="gestion-container">
       <div className="gestion-wrapper">
         <div className="gestion-header">
           <h1 className="gestion-title">Gestión de Productos</h1>
-          <button
-            className="btn-nuevo"
-            onClick={() => navigate("/admin/productos/nuevo")}
-          >
+          <button className="btn-nuevo" onClick={handleNuevoProducto}>
             <PlusCircle className="w-5 h-5" />
             NUEVO PRODUCTO
           </button>
         </div>
 
-        {/* Buscador */}
         <div className="buscador-wrapper">
           <div className="buscador-input">
             <Search className="buscador-icon" />
@@ -61,7 +90,6 @@ export default function GestionProductosPage() {
           </div>
         </div>
 
-        {/* Tabla */}
         <div className="tabla-wrapper">
           <div className="tabla-scroll">
             <table className="tabla-productos">
@@ -87,25 +115,14 @@ export default function GestionProductosPage() {
                     <td>{producto.stock_kg} kg</td>
                     <td>
                       <div className="acciones">
-                        {/* Ver detalle */}
                         <Link to={`/admin/productos/${producto.id}`}>
                           <button className="btn-ver">
                             <Eye className="w-5 h-5" />
                           </button>
                         </Link>
-                        {/* Borrar */}
                         <button
                           className="btn-borrar"
-                          onClick={async () => {
-                            try {
-                              await deleteProducto(producto.id);
-                              setProductos((prev) =>
-                                prev.filter((p) => p.id !== producto.id)
-                              );
-                            } catch (err) {
-                              setError("No se pudo borrar el producto");
-                            }
-                          }}
+                          onClick={() => handleEliminarProducto(producto.id)}
                         >
                           <Trash2 className="w-5 h-5" />
                         </button>

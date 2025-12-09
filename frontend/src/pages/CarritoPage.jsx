@@ -1,36 +1,35 @@
-import React from "react";
 import { Link } from "react-router-dom";
 import { Trash2, ShoppingBag, ArrowRight } from "lucide-react";
 import "../styles/Carrito.css";
-import { useCarrito } from "../context/CarritoContext"; // 👈 USAR EL CONTEXTO
+import { useCarrito } from "../context/CarritoContext"; 
+
+const CANTIDAD_MINIMA = 0.5;
+const GASTOS_ENVIO = 3.50;
 
 export default function CarritoPage() {
-  // 👇 Obtener todo del contexto en lugar de estado local
-  const { carrito, loading, updateItem: updateItemContext, removeItem: removeItemContext, clear } = useCarrito();
+  const { carrito, loading, updateItem, removeItem, clear } = useCarrito();
 
   const items = carrito?.items || [];
 
-  const updateCantidad = async (itemId, newCantidad) => {
-    if (newCantidad >= 0.5) {
+  const handleCantidadChange = async (itemId, newCantidad) => {
+    if (newCantidad >= CANTIDAD_MINIMA) {
       try {
-        await updateItemContext(itemId, newCantidad);
+        await updateItem(itemId, newCantidad);
       } catch (err) {
         console.error(err);
       }
     }
   };
 
-  const removeItemFromCarrito = async (itemId) => {
+  const handleRemoveItem = async (itemId) => {
     try {
-
-      await removeItemContext(itemId);
-
+      await removeItem(itemId);
     } catch (err) {
       console.error("❌ Error al eliminar:", err);
     }
   };
 
-  const vaciarCarrito = async () => {
+  const handleClearCarrito = async () => {
     try {
       await clear();
     } catch (err) {
@@ -42,8 +41,7 @@ export default function CarritoPage() {
     (sum, item) => sum + (parseFloat(item.cantidad_kg) * parseFloat(item.precio_unitario)),
     0
   );
-  const gastosEnvio = 3.50;
-  const total = subtotal + gastosEnvio;
+  const total = subtotal + GASTOS_ENVIO;
 
   if (loading) return <p>Cargando carrito...</p>;
 
@@ -80,11 +78,11 @@ export default function CarritoPage() {
 
                     <div className="item-actions">
                       <div className="cantidad-control">
-                        <button onClick={() => updateCantidad(item.id, parseFloat(item.cantidad_kg) - 0.5)}>-</button>
+                        <button onClick={() => handleCantidadChange(item.id, parseFloat(item.cantidad_kg) - 0.5)}>-</button>
                         <span>{Number(item.cantidad_kg).toFixed(1)} kg</span>
-                        <button onClick={() => updateCantidad(item.id, parseFloat(item.cantidad_kg) + 0.5)}>+</button>
+                        <button onClick={() => handleCantidadChange(item.id, parseFloat(item.cantidad_kg) + 0.5)}>+</button>
                       </div>
-                      <button onClick={() => removeItemFromCarrito(item.id)} className="btn-remove">
+                      <button onClick={() => handleRemoveItem(item.id)} className="btn-remove">
                         <Trash2 className="icon-small" /> Eliminar
                       </button>
                     </div>
@@ -106,7 +104,7 @@ export default function CarritoPage() {
               </div>
               <div className="resumen-line">
                 <span>Gastos envío:</span>
-                <span>€{gastosEnvio.toFixed(2)}</span>
+                <span>€{GASTOS_ENVIO.toFixed(2)}</span>
               </div>
               <div className="resumen-total">
                 <span>Total:</span>
@@ -121,7 +119,7 @@ export default function CarritoPage() {
               <Link to="/catalogo">
                 <button className="btn-secondary full">SEGUIR COMPRANDO</button>
               </Link>
-              <button onClick={vaciarCarrito} className="btn-remove full mt-3">
+              <button onClick={handleClearCarrito} className="btn-remove full mt-3">
                 Vaciar carrito
               </button>
             </div>

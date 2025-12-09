@@ -1,34 +1,40 @@
 import { useState, useEffect } from "react";
-import { loginUsuario, registrarUsuario, logoutUsuario, getUsuario } from "../services/authService";
+import { 
+  loginUsuario, 
+  registrarUsuario, 
+  logoutUsuario, 
+  getUsuario 
+} from "../services/authService";
 
 export function userAuth() {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const fetchUser = async () => {
+    const initializeAuth = async () => {
       try {
-        const me = await getUsuario(); // backend devuelve objeto usuario
-        setUser(me);
-      } catch {
+        const userData = await getUsuario();
+        setUser(userData);
+      } catch (error) {
         setUser(null);
       } finally {
         setLoading(false);
       }
     };
-    fetchUser();
+
+    initializeAuth();
   }, []);
 
-  const login = async (data) => {
-    const res = await loginUsuario(data);
-    setUser(res.user); // login devuelve { access_token, user }
-    return res;
+  const login = async (credentials) => {
+    const response = await loginUsuario(credentials);
+    setUser(response.user);
+    return response;
   };
 
-  const register = async (data) => {
-    const res = await registrarUsuario(data);
-    setUser(res.user); // register devuelve { access_token, user }
-    return res;
+  const register = async (userData) => {
+    const response = await registrarUsuario(userData);
+    setUser(response.user);
+    return response;
   };
 
   const logout = async () => {
@@ -37,7 +43,15 @@ export function userAuth() {
   };
 
   const isLoggedIn = !!user;
-  const tipoUsuario = user?.tipo_usuario ? user.tipo_usuario.toLowerCase() : null;
+  const tipoUsuario = user?.tipo_usuario?.toLowerCase() || null;
 
-  return { user, tipoUsuario, isLoggedIn, loading, login, register, logout };
+  return { 
+    user, 
+    tipoUsuario, 
+    isLoggedIn, 
+    loading, 
+    login, 
+    register, 
+    logout 
+  };
 }

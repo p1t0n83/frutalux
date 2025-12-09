@@ -1,11 +1,11 @@
-// src/context/AuthContext.jsx
-import React, { createContext, useContext } from "react";
-import { userAuth } from "../hooks/userAuth"; // ✅ aquí sí existe
+
+import { createContext, useContext } from "react";
+import { userAuth } from "../hooks/userAuth"; 
 
 const AuthContext = createContext(null);
 
 export function AuthProvider({ children }) {
-  const value = userAuth(); // ✅ usa tu hook
+  const value = userAuth(); 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }
 

@@ -1,25 +1,44 @@
-// src/pages/Checkout.jsx
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { CreditCard, Truck, CheckCircle, AlertCircle } from "lucide-react";
 import { generarFactura } from "../services/facturaService";
 import { getCarrito } from "../services/carritoService";
-import { useCarrito } from "../context/CarritoContext"; // 👈 IMPORTAR EL CONTEXTO
+import { useCarrito } from "../context/CarritoContext";
 import "../styles/Checkout.css";
+
+const GASTOS_ENVIO = 3.50;
+
+const PRECIOS_CAJAS = {
+  pequena: { precio: 19.99, kg: 5 },
+  mediana: { precio: 34.99, kg: 9 },
+  grande: { precio: 49.99, kg: 13 }
+};
+
+const DESCUENTOS_FRECUENCIA = {
+  semanal: 5,
+  quincenal: 3,
+  mensual: 5
+};
+
+const METODOS_PAGO = [
+  { id: "tarjeta", nombre: "Tarjeta de crédito/débito", icon: "💳" },
+  { id: "transferencia", nombre: "Transferencia bancaria", icon: "🏦" },
+  { id: "reembolso", nombre: "Contra reembolso", icon: "💵" }
+];
 
 export default function Checkout({ tipo = "pedido" }) {
   const navigate = useNavigate();
   const location = useLocation();
-  const { clear } = useCarrito(); // 👈 OBTENER clear del contexto
+  const { clear } = useCarrito();
+  
   const [metodoPago, setMetodoPago] = useState("tarjeta");
   const [mensaje, setMensaje] = useState("");
   const [productos, setProductos] = useState([]);
   const [subtotal, setSubtotal] = useState(0);
-  const [gastosEnvio, setGastosEnvio] = useState(3.50);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [verFactura, setVerFactura] = useState(false);
-  // Datos del cliente
+  
   const [cliente, setCliente] = useState({
     nombre: "",
     email: "",
@@ -29,132 +48,109 @@ export default function Checkout({ tipo = "pedido" }) {
     provincia: ""
   });
 
-  // Cargar datos según el tipo
-  useEffect(() => {
-    const cargarDatos = async () => {
-      try {
-        // Si es suscripción, cargar datos de sessionStorage
-        if (tipo === "suscripcion" || location.pathname === "/checkout-suscripcion") {
-          const suscripcionData = sessionStorage.getItem("suscripcionData");
+  const esSuscripcion = tipo === "suscripcion" || location.pathname === "/checkout-suscripcion";
 
-          if (!suscripcionData) {
-            setError("No hay datos de suscripción. Por favor, configura tu caja primero.");
-            setLoading(false);
-            setTimeout(() => navigate("/preferencias-caja"), 2000);
-            return;
-          }
+  const calcularPrecioSuscripcion = (tamano, frecuencia) => {
+    const { precio, kg } = PRECIOS_CAJAS[tamano] || PRECIOS_CAJAS.pequena;
+    const descuento = DESCUENTOS_FRECUENCIA[frecuencia] || 0;
+    const precioFinal = precio * (1 - descuento / 100);
+    
+    return { precio, precioFinal, kg, descuento };
+  };
 
-          const data = JSON.parse(suscripcionData);
+  const cargarSuscripcion = () => {
+    const suscripcionData = sessionStorage.getItem("suscripcionData");
+    
+    if (!suscripcionData) {
+      setError("No hay datos de suscripción. Por favor, configura tu caja primero.");
+      setLoading(false);
+      setTimeout(() => navigate("/preferencias-caja"), 2000);
+      return;
+    }
 
-          // Precios base según tamaño
-          let precioBase = 0;
-          let kg = 0;
+    const data = JSON.parse(suscripcionData);
+    const { precio, precioFinal, kg, descuento } = calcularPrecioSuscripcion(data.tamano, data.frecuencia);
+    
+    const nombreCaja = `Caja ${data.tamano.charAt(0).toUpperCase() + data.tamano.slice(1)} - Entrega ${data.frecuencia}`;
+    
+    const productosSuscripcion = [{
+      producto: {
+        nombre: nombreCaja + (descuento > 0 ? ` (${descuento}% descuento)` : '')
+      },
+      cantidad_kg: 1,
+      precio_unitario: precioFinal,
+      kg_caja: kg,
+      precioOriginal: precio,
+      descuento: descuento,
+      esCaja: true
+    }];
 
-          if (data.tamano === "pequena") {
-            precioBase = 19.99;
-            kg = 5;
-          } else if (data.tamano === "mediana") {
-            precioBase = 34.99;
-            kg = 9;
-          } else {
-            precioBase = 49.99;
-            kg = 13;
-          }
+    setProductos(productosSuscripcion);
+    setSubtotal(precioFinal);
+    setLoading(false);
+  };
 
-          // Aplicar descuento según frecuencia
-          let precioFinal = precioBase;
-          let descuento = 0;
+  const cargarCarrito = async () => {
+    try {
+      const data = await getCarrito();
+      const items = data.items || [];
 
-          if (data.frecuencia === "semanal") {
-            descuento = 5;
-            precioFinal = precioBase * 0.95;
-          } else if (data.frecuencia === "quincenal") {
-            descuento = 3;
-            precioFinal = precioBase * 0.97;
-          } else if (data.frecuencia === "mensual") {
-            descuento = 5;
-            precioFinal = precioBase * 0.95;
-          }
-
-          const nombreCaja = `Caja ${data.tamano.charAt(0).toUpperCase() + data.tamano.slice(1)} - Entrega ${data.frecuencia}`;
-
-          // Crear producto de suscripción
-          const productosSuscripcion = [
-            {
-              producto: {
-                nombre: nombreCaja + (descuento > 0 ? ` (${descuento}% descuento)` : '')
-              },
-              cantidad_kg: 1,
-              precio_unitario: precioFinal,
-              kg_caja: kg,
-              precioOriginal: precioBase,
-              descuento: descuento,
-              esCaja: true
-            }
-          ];
-
-          setProductos(productosSuscripcion);
-          setSubtotal(precioFinal);
-          setLoading(false);
-          return;
-        }
-
-        // Si es pedido normal, cargar carrito
-        const data = await getCarrito();
-        const items = data.items || [];
-
-        if (items.length === 0) {
-          setError("Tu carrito está vacío. Añade productos antes de continuar.");
-          setLoading(false);
-          setTimeout(() => navigate("/catalogo"), 2000);
-          return;
-        }
-
-        setProductos(items);
-
-        // Calcular subtotal
-        const sub = items.reduce((acc, item) => {
-          const precio = parseFloat(item.precio_unitario) || 0;
-          const cantidad = parseFloat(item.cantidad_kg) || 0;
-          return acc + (precio * cantidad);
-        }, 0);
-
-        setSubtotal(sub);
+      if (items.length === 0) {
+        setError("Tu carrito está vacío. Añade productos antes de continuar.");
         setLoading(false);
-
-      } catch (err) {
-        console.error("Error cargando datos:", err);
-        setError("Error al cargar los datos del pedido");
-        setLoading(false);
+        setTimeout(() => navigate("/catalogo"), 2000);
+        return;
       }
-    };
 
-    cargarDatos();
-  }, [tipo, location.pathname, navigate]);
+      setProductos(items);
 
-  const total = subtotal + gastosEnvio;
+      const calculoSubtotal = items.reduce((acc, item) => {
+        const precio = parseFloat(item.precio_unitario) || 0;
+        const cantidad = parseFloat(item.cantidad_kg) || 0;
+        return acc + (precio * cantidad);
+      }, 0);
 
-  const handleConfirmar = async () => {
-    // Validar datos del cliente
+      setSubtotal(calculoSubtotal);
+      setLoading(false);
+    } catch (err) {
+      console.error("Error cargando carrito:", err);
+      setError("Error al cargar los datos del pedido");
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    if (esSuscripcion) {
+      cargarSuscripcion();
+    } else {
+      cargarCarrito();
+    }
+  }, [tipo, location.pathname]);
+
+  const validarFormulario = () => {
     if (!cliente.nombre || !cliente.direccion || !cliente.cp || !cliente.localidad) {
       setMensaje("❌ Por favor completa todos los campos obligatorios");
       setTimeout(() => setMensaje(""), 4000);
-      return;
+      return false;
     }
 
-    // Validar email
     if (!cliente.email || !cliente.email.includes("@")) {
       setMensaje("❌ Por favor introduce un email válido");
       setTimeout(() => setMensaje(""), 4000);
-      return;
+      return false;
     }
 
-    // Validar que haya productos
     if (productos.length === 0) {
       setMensaje("❌ No hay productos en el pedido");
       setTimeout(() => setMensaje(""), 4000);
-      return;
+      return false;
     }
+
+    return true;
+  };
+
+  const handleConfirmar = async () => {
+    if (!validarFormulario()) return;
 
     setMensaje("⏳ Generando factura...");
 
@@ -165,15 +161,14 @@ export default function Checkout({ tipo = "pedido" }) {
         precio: prod.precio_unitario || 0,
       }));
 
-      const tipoFactura = tipo === "suscripcion" || location.pathname === "/checkout-suscripcion"
-        ? "suscripcion"
-        : "pedido";
+      const tipoFactura = esSuscripcion ? "suscripcion" : "pedido";
+      const total = subtotal + GASTOS_ENVIO;
 
       const factura = await generarFactura({
         tipo: tipoFactura,
         productos: productosFactura,
         subtotal,
-        gastos_envio: gastosEnvio,
+        gastos_envio: GASTOS_ENVIO,
         total,
         metodoPago,
         cliente_nombre: cliente.nombre,
@@ -185,35 +180,23 @@ export default function Checkout({ tipo = "pedido" }) {
       });
 
       setMensaje("✅ Pedido confirmado con éxito. Factura generada.");
+      
       if (verFactura && factura.url) {
         window.open(factura.url, "_blank");
       }
 
-      // LIMPIAR CARRITO Y ACTUALIZAR CONTEXTO
       setTimeout(async () => {
         setMensaje("");
 
         if (tipoFactura === "suscripcion") {
-          // Limpiar sessionStorage si es suscripción
           sessionStorage.removeItem("suscripcionData");
           navigate("/");
         } else {
-          // Si es pedido normal, vaciar el carrito usando la función del contexto
           try {
-
-
-            // ✅ Usar clear() del contexto (la misma que el botón "Vaciar carrito")
-            // Esta función actualiza automáticamente el backend Y el contexto
             await clear();
-
-
-
-            // Redirigir al inicio SIN recargar página
             navigate("/");
-
           } catch (error) {
             console.error("⚠️ Error al vaciar el carrito:", error);
-            // Si falla, redirigir de todas formas
             navigate("/");
           }
         }
@@ -224,6 +207,10 @@ export default function Checkout({ tipo = "pedido" }) {
       setMensaje(`❌ Error: ${err.message}`);
       setTimeout(() => setMensaje(""), 6000);
     }
+  };
+
+  const actualizarCliente = (campo, valor) => {
+    setCliente({ ...cliente, [campo]: valor });
   };
 
   if (loading) {
@@ -255,7 +242,7 @@ export default function Checkout({ tipo = "pedido" }) {
     );
   }
 
-  const esSuscripcion = tipo === "suscripcion" || location.pathname === "/checkout-suscripcion";
+  const total = subtotal + GASTOS_ENVIO;
 
   return (
     <div className="checkout-container">
@@ -265,9 +252,7 @@ export default function Checkout({ tipo = "pedido" }) {
         </h1>
 
         <div className="checkout-grid">
-          {/* Formulario */}
           <div className="checkout-form">
-            {/* Dirección */}
             <div className="checkout-card">
               <div className="checkout-card-header">
                 <Truck className="icon" />
@@ -278,59 +263,54 @@ export default function Checkout({ tipo = "pedido" }) {
                   type="text"
                   placeholder="Nombre completo *"
                   value={cliente.nombre}
-                  onChange={(e) => setCliente({ ...cliente, nombre: e.target.value })}
+                  onChange={(e) => actualizarCliente("nombre", e.target.value)}
                   required
                 />
                 <input
                   type="email"
                   placeholder="Email *"
                   value={cliente.email}
-                  onChange={(e) => setCliente({ ...cliente, email: e.target.value })}
+                  onChange={(e) => actualizarCliente("email", e.target.value)}
                   required
                 />
                 <input
                   type="text"
                   placeholder="Dirección *"
                   value={cliente.direccion}
-                  onChange={(e) => setCliente({ ...cliente, direccion: e.target.value })}
+                  onChange={(e) => actualizarCliente("direccion", e.target.value)}
                   required
                 />
                 <input
                   type="text"
                   placeholder="Código Postal *"
                   value={cliente.cp}
-                  onChange={(e) => setCliente({ ...cliente, cp: e.target.value })}
+                  onChange={(e) => actualizarCliente("cp", e.target.value)}
                   required
                 />
                 <input
                   type="text"
                   placeholder="Localidad *"
                   value={cliente.localidad}
-                  onChange={(e) => setCliente({ ...cliente, localidad: e.target.value })}
+                  onChange={(e) => actualizarCliente("localidad", e.target.value)}
                   required
                 />
                 <input
                   type="text"
                   placeholder="Provincia *"
                   value={cliente.provincia}
-                  onChange={(e) => setCliente({ ...cliente, provincia: e.target.value })}
+                  onChange={(e) => actualizarCliente("provincia", e.target.value)}
                   required
                 />
               </div>
             </div>
 
-            {/* Método de pago */}
             <div className="checkout-card">
               <div className="checkout-card-header">
                 <CreditCard className="icon" />
                 <h2>Método de Pago</h2>
               </div>
               <div className="checkout-card-body">
-                {[
-                  { id: "tarjeta", nombre: "Tarjeta de crédito/débito", icon: "💳" },
-                  { id: "transferencia", nombre: "Transferencia bancaria", icon: "🏦" },
-                  { id: "reembolso", nombre: "Contra reembolso", icon: "💵" }
-                ].map((metodo) => (
+                {METODOS_PAGO.map((metodo) => (
                   <label
                     key={metodo.id}
                     className={`metodo-pago ${metodoPago === metodo.id ? "activo" : ""}`}
@@ -349,14 +329,12 @@ export default function Checkout({ tipo = "pedido" }) {
               </div>
             </div>
 
-            {/* Notas */}
             <div className="checkout-card">
               <h2>Notas del Pedido</h2>
               <textarea placeholder="Instrucciones especiales de entrega..." />
             </div>
           </div>
 
-          {/* Resumen */}
           <div className="checkout-summary">
             <h2>Tu Pedido</h2>
             {esSuscripcion && (
@@ -374,12 +352,13 @@ export default function Checkout({ tipo = "pedido" }) {
                 </p>
               </div>
             )}
+            
             <div className="summary-items">
               {productos.length === 0 ? (
                 <p>No hay productos</p>
               ) : (
-                productos.map((prod, i) => (
-                  <div key={i} className="summary-item">
+                productos.map((prod, index) => (
+                  <div key={index} className="summary-item">
                     <div>
                       <p>{prod.producto?.nombre}</p>
                       {prod.esCaja && prod.kg_caja ? (
@@ -401,14 +380,16 @@ export default function Checkout({ tipo = "pedido" }) {
                 ))
               )}
             </div>
+            
             <div className="summary-totals">
               <div><span>Subtotal:</span><span>€{subtotal.toFixed(2)}</span></div>
-              <div><span>Gastos envío:</span><span>€{gastosEnvio.toFixed(2)}</span></div>
+              <div><span>Gastos envío:</span><span>€{GASTOS_ENVIO.toFixed(2)}</span></div>
               <div className="summary-total">
                 <span>Total:</span>
                 <span>€{total.toFixed(2)}</span>
               </div>
             </div>
+            
             <label style={{ display: "flex", alignItems: "center", gap: "8px" }}>
               <input
                 type="checkbox"
@@ -417,6 +398,7 @@ export default function Checkout({ tipo = "pedido" }) {
               />
               Ver factura al finalizar
             </label>
+            
             <button className="btn-confirmar" onClick={handleConfirmar}>
               <CheckCircle className="icon" />
               {esSuscripcion ? "CONFIRMAR SUSCRIPCIÓN" : "CONFIRMAR PEDIDO"}
@@ -425,8 +407,8 @@ export default function Checkout({ tipo = "pedido" }) {
             {mensaje && (
               <div className={
                 mensaje.includes("✅") ? "mensaje-exito" :
-                  mensaje.includes("⏳") ? "mensaje-info" :
-                    "mensaje-error"
+                mensaje.includes("⏳") ? "mensaje-info" :
+                "mensaje-error"
               }>
                 {mensaje}
               </div>

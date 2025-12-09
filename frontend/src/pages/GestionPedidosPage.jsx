@@ -1,61 +1,101 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { Search, Eye, CreditCard } from "lucide-react";
 import { getPedidos } from "../services/pedidoService";
 import "../styles/GestionPedidos.css";
+
+const ESTADOS = [
+  { value: "all", label: "Todos los estados" },
+  { value: "Pendiente", label: "Pendiente" },
+  { value: "Confirmado", label: "Confirmado" },
+  { value: "Preparando", label: "Preparando" },
+  { value: "Enviado", label: "Enviado" },
+  { value: "Entregado", label: "Entregado" },
+  { value: "Pagado", label: "Pagado" }
+];
+
+const obtenerClaseEstado = (estado) => {
+  const estados = {
+    "Entregado": "estado-entregado",
+    "Enviado": "estado-enviado",
+    "Preparando": "estado-preparando",
+    "Confirmado": "estado-confirmado",
+    "Pagado": "estado-pagado"
+  };
+  return estados[estado] || "estado-pendiente";
+};
+
+const formatearFecha = (fecha) => {
+  return new Date(fecha).toLocaleDateString("es-ES", {
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
+  });
+};
 
 export default function GestionPedidosPage() {
   const [searchTerm, setSearchTerm] = useState("");
   const [filterEstado, setFilterEstado] = useState("all");
   const [pedidos, setPedidos] = useState([]);
   const [error, setError] = useState(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const cargarPedidos = async () => {
       try {
         const data = await getPedidos();
+        const listaPedidos = data.data || data.pedidos || data || [];
 
-
-        const pedidosNormalizados = (data.data || data.pedidos || data || []).map(p => ({
-          id: p.id,
-          numero: p.numero || p.numero_pedido,
-          cliente: p.cliente || p.cliente_nombre || "Sin nombre",
-          estado: p.estado === "pagado" ? "Pagado" : p.estado,
-          fecha: new Date(p.created_at).toLocaleDateString("es-ES", {
-            day: "2-digit",
-            month: "2-digit",
-            year: "numeric",
-          }),
-          tipo: p.tipo || p.tipo_pedido,
-          total: p.total,
-          factura_url: p.factura_url,
+        const pedidosNormalizados = listaPedidos.map((pedido) => ({
+          id: pedido.id,
+          numero: pedido.numero || pedido.numero_pedido,
+          cliente: pedido.cliente || pedido.cliente_nombre || "Sin nombre",
+          estado: pedido.estado === "pagado" ? "Pagado" : pedido.estado,
+          fecha: formatearFecha(pedido.created_at),
+          tipo: pedido.tipo || pedido.tipo_pedido,
+          total: pedido.total,
+          factura_url: pedido.factura_url,
         }));
 
         setPedidos(pedidosNormalizados);
       } catch (err) {
         console.error("Error al cargar pedidos:", err);
         setError("Error al cargar pedidos");
+      } finally {
+        setLoading(false);
       }
     };
+
     cargarPedidos();
   }, []);
 
-  const filteredPedidos = pedidos.filter((p) => {
+  const filteredPedidos = pedidos.filter((pedido) => {
     const matchesSearch =
-      p.numero?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      p.cliente?.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesEstado = filterEstado === "all" || p.estado === filterEstado;
+      pedido.numero?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      pedido.cliente?.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesEstado = filterEstado === "all" || pedido.estado === filterEstado;
     return matchesSearch && matchesEstado;
   });
 
-  if (error) return <p className="error-popup">{error}</p>;
+  const abrirFactura = (url) => {
+    if (url) {
+      window.open(url, "_blank");
+    }
+  };
+
+  if (loading) {
+    return <p>Cargando pedidos...</p>;
+  }
+
+  if (error) {
+    return <p className="error-popup">{error}</p>;
+  }
 
   return (
     <div className="gestion-pedidos-container">
       <div className="gestion-pedidos-wrapper">
         <h1 className="gestion-title">Gestión de Pedidos</h1>
 
-        {/* Buscador y Filtro */}
         <div className="buscador-wrapper">
           <div className="buscador-input">
             <Search className="buscador-icon" />
@@ -72,17 +112,14 @@ export default function GestionPedidosPage() {
             onChange={(e) => setFilterEstado(e.target.value)}
             className="select-filtro"
           >
-            <option value="all">Todos los estados</option>
-            <option value="Pendiente">Pendiente</option>
-            <option value="Confirmado">Confirmado</option>
-            <option value="Preparando">Preparando</option>
-            <option value="Enviado">Enviado</option>
-            <option value="Entregado">Entregado</option>
-            <option value="Pagado">Pagado</option>
+            {ESTADOS.map((estado) => (
+              <option key={estado.value} value={estado.value}>
+                {estado.label}
+              </option>
+            ))}
           </select>
         </div>
 
-        {/* Tabla */}
         <div className="tabla-wrapper">
           <div className="tabla-scroll">
             <table className="tabla-pedidos">
@@ -115,36 +152,21 @@ export default function GestionPedidosPage() {
                     </td>
                     <td className="text-right">{pedido.total}</td>
                     <td>
-                      <span
-                        className={`estado-pill ${pedido.estado === "Entregado"
-                            ? "estado-entregado"
-                            : pedido.estado === "Enviado"
-                              ? "estado-enviado"
-                              : pedido.estado === "Preparando"
-                                ? "estado-preparando"
-                                : pedido.estado === "Confirmado"
-                                  ? "estado-confirmado"
-                                  : pedido.estado === "Pagado"
-                                    ? "estado-pagado"
-                                    : "estado-pendiente"
-                          }`}
-                      >
+                      <span className={`estado-pill ${obtenerClaseEstado(pedido.estado)}`}>
                         {pedido.estado}
                       </span>
                     </td>
                     <td>
                       <div className="acciones">
-                        {/* Ver detalle */}
                         <Link to={`/admin/pedidos/${pedido.id}`}>
                           <button className="btn-ver">
                             <Eye className="w-5 h-5" />
                           </button>
                         </Link>
-                        {/* Ver factura */}
                         {pedido.factura_url && (
                           <button
                             className="btn-factura"
-                            onClick={() => window.open(pedido.factura_url, "_blank")}
+                            onClick={() => abrirFactura(pedido.factura_url)}
                           >
                             <CreditCard className="w-5 h-5" />
                           </button>

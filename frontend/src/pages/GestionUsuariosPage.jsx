@@ -1,14 +1,24 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Search, UserPlus, Eye, Trash2 } from "lucide-react";
 import { getUsuarios, deleteUsuario } from "../services/usuarioService";
 import "../styles/GestionUsuarios.css";
 
+const obtenerClaseTipoUsuario = (tipo) => {
+  return tipo === "administrador" ? "admin" : "cliente";
+};
+
+const obtenerEtiquetaTipoUsuario = (tipo) => {
+  return tipo === "administrador" ? "Admin" : "Cliente";
+};
+
 export default function GestionUsuarios() {
+  const navigate = useNavigate();
+  
   const [searchTerm, setSearchTerm] = useState("");
   const [usuarios, setUsuarios] = useState([]);
   const [error, setError] = useState(null);
-  const navigate = useNavigate();
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const cargarUsuarios = async () => {
@@ -16,33 +26,65 @@ export default function GestionUsuarios() {
         const data = await getUsuarios();
         setUsuarios(data);
       } catch (err) {
+        console.error("Error al cargar usuarios:", err);
         setError("Error al cargar usuarios");
+      } finally {
+        setLoading(false);
       }
     };
+
     cargarUsuarios();
   }, []);
 
-  const filteredUsers = usuarios.filter(
-    (u) =>
-      u.nombre?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      u.email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      u.localidad?.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const filteredUsers = usuarios.filter((usuario) => {
+    const searchLower = searchTerm.toLowerCase();
+    return (
+      usuario.nombre?.toLowerCase().includes(searchLower) ||
+      usuario.email?.toLowerCase().includes(searchLower) ||
+      usuario.localidad?.toLowerCase().includes(searchLower)
+    );
+  });
 
-  if (error) return <p className="error-popup">{error}</p>;
+  const handleEliminarUsuario = async (usuarioId) => {
+    if (!window.confirm("¿Estás seguro de eliminar este usuario?")) {
+      return;
+    }
+
+    try {
+      await deleteUsuario(usuarioId);
+      setUsuarios((prevUsuarios) => 
+        prevUsuarios.filter((u) => u.id !== usuarioId)
+      );
+    } catch (err) {
+      console.error("Error al eliminar usuario:", err);
+      setError("No se pudo eliminar el usuario");
+      setTimeout(() => setError(null), 3000);
+    }
+  };
+
+  const handleNuevoUsuario = () => {
+    navigate("/admin/usuarios/nuevo");
+  };
+
+  if (loading) {
+    return <p>Cargando usuarios...</p>;
+  }
+
+  if (error) {
+    return <p className="error-popup">{error}</p>;
+  }
 
   return (
     <div className="gestion-container">
       <div className="gestion-wrapper">
         <div className="gestion-header">
           <h1 className="gestion-title">Gestión de Usuarios</h1>
-          <button className="btn-nuevo" onClick={() => navigate("/admin/usuarios/nuevo")}>
+          <button className="btn-nuevo" onClick={handleNuevoUsuario}>
             <UserPlus className="w-5 h-5" />
             NUEVO USUARIO
           </button>
         </div>
 
-        {/* Buscador */}
         <div className="buscador-wrapper">
           <div className="buscador-input">
             <Search className="buscador-icon" />
@@ -56,7 +98,6 @@ export default function GestionUsuarios() {
           </div>
         </div>
 
-        {/* Tabla */}
         <div className="tabla-wrapper">
           <div className="tabla-scroll">
             <table className="tabla-usuarios">
@@ -77,30 +118,19 @@ export default function GestionUsuarios() {
                     <td data-label="Nombre">{usuario.nombre}</td>
                     <td data-label="Email">{usuario.email}</td>
                     <td data-label="Tipo">
-                      <span
-                        className={`badge ${usuario.tipo_usuario === "administrador"
-                          ? "admin"
-                          : "cliente"
-                          }`}
-                      >
-                        {usuario.tipo_usuario === "administrador"
-                          ? "Admin"
-                          : "Cliente"}
+                      <span className={`badge ${obtenerClaseTipoUsuario(usuario.tipo_usuario)}`}>
+                        {obtenerEtiquetaTipoUsuario(usuario.tipo_usuario)}
                       </span>
                     </td>
                     <td data-label="Teléfono">{usuario.telefono}</td>
                     <td data-label="Localidad">{usuario.localidad}</td>
                     <td data-label="Estado">
-                      <span
-                        className={`estado ${usuario.activo ? "activo" : "inactivo"
-                          }`}
-                      >
+                      <span className={`estado ${usuario.activo ? "activo" : "inactivo"}`}>
                         {usuario.activo ? "Activo" : "Inactivo"}
                       </span>
                     </td>
                     <td>
                       <div className="acciones">
-                        {/* Aquí pasamos el id en la ruta */}
                         <Link to={`/admin/usuarios/${usuario.id}`}>
                           <button className="btn-ver">
                             <Eye className="w-5 h-5" />
@@ -108,16 +138,7 @@ export default function GestionUsuarios() {
                         </Link>
                         <button
                           className="btn-borrar"
-                          onClick={async () => {
-                            try {
-                              await deleteUsuario(usuario.id);
-                              setUsuarios((prev) =>
-                                prev.filter((u) => u.id !== usuario.id)
-                              );
-                            } catch (err) {
-                              setError("No se pudo borrar el usuario");
-                            }
-                          }}
+                          onClick={() => handleEliminarUsuario(usuario.id)}
                         >
                           <Trash2 className="w-5 h-5" />
                         </button>

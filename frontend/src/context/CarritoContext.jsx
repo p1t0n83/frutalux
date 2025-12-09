@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useEffect, useState, useCallback } from "react";
+import { createContext, useContext, useEffect, useState, useCallback } from "react";
 import { userAuthContext } from "./AuthContext";
 import {
   getCarrito,
@@ -15,19 +15,19 @@ export function CarritoProvider({ children }) {
   const [carrito, setCarrito] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  // Inicializar carrito cuando el usuario está disponible
   const bootstrap = useCallback(async () => {
     if (authLoading) return;
+    
     if (!user) {
       setCarrito(null);
       setLoading(false);
       return;
     }
+
     setLoading(true);
     try {
-      // Recuperar carrito del usuario autenticado
-      const c = await getCarrito();
-      setCarrito(c);
+      const carritoData = await getCarrito();
+      setCarrito(carritoData);
     } finally {
       setLoading(false);
     }
@@ -38,28 +38,28 @@ export function CarritoProvider({ children }) {
   }, [bootstrap]);
 
   const refresh = async () => {
-    const c = await getCarrito();
-    setCarrito(c);
+    const carritoData = await getCarrito();
+    setCarrito(carritoData);
   };
 
   const addItem = async (payload) => {
-    const c = await addItemApi(payload);
-    setCarrito(c);
+    const carritoData = await addItemApi(payload);
+    setCarrito(carritoData);
   };
 
   const updateItem = async (itemId, cantidad_kg) => {
-    const c = await updateItemApi(itemId, cantidad_kg);
-    setCarrito(c);
+    const carritoData = await updateItemApi(itemId, cantidad_kg);
+    setCarrito(carritoData);
   };
 
   const removeItem = async (itemId) => {
-    const c = await removeItemApi(itemId);
-    setCarrito(c);
+    const carritoData = await removeItemApi(itemId);
+    setCarrito(carritoData);
   };
 
   const clear = async () => {
-    const c = await clearCarritoApi();
-    setCarrito(c);
+    const carritoData = await clearCarritoApi();
+    setCarrito(carritoData);
   };
 
   return (
@@ -72,7 +72,7 @@ export function CarritoProvider({ children }) {
 }
 
 export function useCarrito() {
-  const ctx = useContext(CarritoContext);
-  if (!ctx) throw new Error("useCarrito must be used within CarritoProvider");
-  return ctx;
+  const context = useContext(CarritoContext);
+  if (!context) throw new Error("useCarrito must be used within CarritoProvider");
+  return context;
 }

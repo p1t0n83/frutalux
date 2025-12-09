@@ -17,53 +17,52 @@ async function safeJson(res) {
 }
 
 /**
- * Obtener perfil del usuario autenticado
+ * Función centralizada para hacer peticiones a la API
  */
-export async function getPerfilCliente() {
-  const res = await fetch(`${API_BASE}/me`, {
+async function apiFetch(endpoint, options = {}) {
+  const token = getToken();
+  const res = await fetch(`${API_BASE}${endpoint}`, {
+    ...options,
     headers: {
       "Content-Type": "application/json",
       "Accept": "application/json",
-      Authorization: `Bearer ${getToken()}`
-    }
+      Authorization: `Bearer ${token}`,
+      ...options.headers,
+    },
   });
+  
   const json = await safeJson(res);
-  if (!res.ok) throw new Error(json.message || "Error al obtener perfil");
+  if (!res.ok) throw new Error(json.message || options.errorMessage || "Error en la petición");
   return json;
+}
+
+/**
+ * Obtener perfil del usuario autenticado
+ */
+export async function getPerfilCliente() {
+  return apiFetch("/me", {
+    errorMessage: "Error al obtener perfil"
+  });
 }
 
 /**
  * Actualizar datos del perfil
  */
 export async function updatePerfilCliente(data) {
-  const res = await fetch(`${API_BASE}/cliente/perfil`, {
+  return apiFetch("/cliente/perfil", {
     method: "PUT",
-    headers: {
-      "Content-Type": "application/json",
-      "Accept": "application/json",
-      Authorization: `Bearer ${getToken()}`
-    },
-    body: JSON.stringify(data)
+    body: JSON.stringify(data),
+    errorMessage: "Error al actualizar perfil"
   });
-  const json = await safeJson(res);
-  if (!res.ok) throw new Error(json.message || "Error al actualizar perfil");
-  return json;
 }
 
 /**
  * Cambiar contraseña
  */
 export async function updatePasswordCliente(payload) {
-  const res = await fetch(`${API_BASE}/cliente/password`, {
+  return apiFetch("/cliente/password", {
     method: "PUT",
-    headers: {
-      "Content-Type": "application/json",
-      "Accept": "application/json",
-      Authorization: `Bearer ${getToken()}`
-    },
-    body: JSON.stringify(payload)
+    body: JSON.stringify(payload),
+    errorMessage: "Error al cambiar contraseña"
   });
-  const json = await safeJson(res);
-  if (!res.ok) throw new Error(json.message || "Error al cambiar contraseña");
-  return json;
 }
