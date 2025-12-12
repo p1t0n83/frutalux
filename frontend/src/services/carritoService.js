@@ -1,4 +1,4 @@
-const API_BASE = "http://localhost:8000/api";
+const API_BASE = "http://api.frutalux.duckdns.orgapi";
 
 function getToken() {
   return localStorage.getItem("token");

@@ -27,7 +27,6 @@ class Pedido extends Model
         'cliente_nombre',
     ];
 
-    // Relaciones
     public function usuario()
     {
         return $this->belongsTo(User::class, 'user_id');

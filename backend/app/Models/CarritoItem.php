@@ -6,10 +6,8 @@ use Illuminate\Database\Eloquent\Model;
 
 class CarritoItem extends Model
 {
-    // Nombre de la tabla (si no sigue la convención pluralizada)
     protected $table = 'carrito_items';
 
-    // Campos que se pueden asignar masivamente
     protected $fillable = [
         'carrito_id',
         'producto_id',
@@ -17,7 +15,6 @@ class CarritoItem extends Model
         'precio_unitario',
     ];
 
-    // Relaciones
     public function carrito()
     {
         return $this->belongsTo(Carrito::class);

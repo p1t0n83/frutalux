@@ -29,5 +29,26 @@ class CategoriaSeeder extends Seeder
             'descripcion' => 'Fresas, frambuesas, arándanos',
             'activo' => true,
         ]);
+
+        Categoria::create([
+            'nombre' => 'Frutos secos',
+            'slug' => 'frutos-secos',
+            'descripcion' => 'Almendras, nueces, cacahuetes y similares',
+            'activo' => true,
+        ]);
+
+        Categoria::create([
+            'nombre' => 'Tropicales',
+            'slug' => 'tropicales',
+            'descripcion' => 'Mangos, piñas, plátanos y más',
+            'activo' => true,
+        ]);
+
+        Categoria::create([
+            'nombre' => 'Hortalizas',
+            'slug' => 'hortalizas',
+            'descripcion' => 'Verduras frescas de temporada',
+            'activo' => true,
+        ]);
     }
 }

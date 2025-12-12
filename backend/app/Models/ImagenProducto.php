@@ -18,12 +18,10 @@ class ImagenProducto extends Model
     ];
 
 
-    // 👇 añadimos este campo siempre en la respuesta JSON
     protected $appends = ['url_completa'];
 
     public function getUrlCompletaAttribute()
     {
-        // Devuelve la URL pública (ej. /storage/imagenes/archivo.jpg)
         return Storage::url('imagenes/' . $this->url_imagen);
     }
 

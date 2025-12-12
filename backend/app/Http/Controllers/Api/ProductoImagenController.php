@@ -10,7 +10,6 @@ use Illuminate\Support\Facades\Storage;
 
 class ProductoImagenController extends Controller
 {
-    // Subir nueva imagen
     public function store(Request $request, Producto $producto)
     {
         $request->validate([
@@ -19,16 +18,14 @@ class ProductoImagenController extends Controller
             'orden' => 'nullable|integer',
         ]);
 
-        // Guardar archivo en storage/app/public/imagenes
         $path = $request->file('imagen')->store('imagenes', 'public');
         $nombreArchivo = basename($path);
         $urlCompleta = asset('storage/imagenes/' . $nombreArchivo);
 
-        // Crear registro en la base de datos
         $imagen = ImagenProducto::create([
             'producto_id'   => $producto->id,
-            'nombre_imagen' => $nombreArchivo,   // 👈 solo el nombre
-            'url_imagen'    => $urlCompleta,     // 👈 la URL completa
+            'nombre_imagen' => $nombreArchivo,  
+            'url_imagen'    => $urlCompleta,   
             'es_principal'  => $request->input('es_principal', false),
             'orden'         => $request->input('orden', 0),
         ]);
@@ -36,7 +33,6 @@ class ProductoImagenController extends Controller
         return response()->json($imagen, 201);
     }
 
-    // Borrar imagen
     public function destroy(Producto $producto, ImagenProducto $imagen)
     {
         if ($imagen->producto_id !== $producto->id) {

@@ -45,17 +45,14 @@ class ProductoController extends Controller
     {
         $producto = Producto::with('imagenes')->findOrFail($id);
 
-        // ✅ Borrar imágenes físicas asociadas
         foreach ($producto->imagenes as $imagen) {
             if ($imagen->nombre_imagen) {
                 Storage::disk('public')->delete('imagenes/' . $imagen->nombre_imagen);
             }
         }
 
-        // ✅ Si usas carpetas por producto (ej: /imagenes/producto_{id})
         Storage::disk('public')->deleteDirectory('imagenes/producto_' . $producto->id);
 
-        // ✅ Borrar el producto (esto cascada las filas de imagenes_producto)
         $producto->delete();
 
         return response()->json(['message' => 'Producto e imágenes eliminados'], 200);

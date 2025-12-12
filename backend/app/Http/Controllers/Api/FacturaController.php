@@ -1,5 +1,4 @@
 <?php
-// app/Http/Controllers/Api/FacturaController.php
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
@@ -16,11 +15,9 @@ class FacturaController extends Controller
         try {
             $user = $request->user();
 
-            // Datos de la factura
             $numero = 'FAC-' . now()->format('YmdHis');
             $fecha = now()->format('d/m/Y');
 
-            // Datos del cliente desde frontend
             $cliente = $request->cliente_nombre ?? $user->name;
             $clienteEmail = $request->cliente_email ?? $user->email ?? '';
             $clienteDireccion = $request->cliente_direccion ?? '';
@@ -28,7 +25,6 @@ class FacturaController extends Controller
             $clienteLocalidad = $request->cliente_localidad ?? '';
             $clienteProvincia = $request->cliente_provincia ?? '';
 
-            // Datos del vendedor (FRUTALUX)
             $vendedorNombre = 'FRUTALUX';
             $vendedorDireccion = 'Zurita';
             $vendedorCp = '39479';
@@ -37,17 +33,13 @@ class FacturaController extends Controller
             $vendedorTelefono = '+34 942 000 000';
             $vendedorCif = 'B-98765432';
 
-            // Tipo de pedido
             $tipoFactura = $request->tipo ?? 'pedido';
 
-            // Metodo de pago
             $metodoPago = $request->metodoPago ?? 'tarjeta';
-            // Obtener valores numéricos para el pedido
             $subtotalNumerico = floatval($request->subtotal ?? 0);
             $gastosEnvioNumerico = floatval($request->gastos_envio ?? 0);
             $totalNumerico = floatval($request->total ?? 0);
 
-            // Crear pedido en la base de datos
             $numeroPedido = 'PED-' . now()->format('YmdHis');
             $direccionEnvio = $clienteDireccion . ', ' . $clienteCp . ' ' . $clienteLocalidad . ', ' . $clienteProvincia;
 
@@ -63,24 +55,20 @@ class FacturaController extends Controller
                 'cliente_nombre' => $cliente,
                 'cliente_email' => $clienteEmail,
                 'metodo_pago' => $metodoPago,
-                'factura_numero' => $numero, // El número de factura
+                'factura_numero' => $numero, 
                 'fecha_entrega_estimada' => now()->addDays(3),
             ]);
-            // Productos
             $productos = $request->productos ?? [];
             $subtotal = number_format($request->subtotal ?? 0, 2, ',', '.');
             $gastosEnvio = number_format($request->gastos_envio ?? 0, 2, ',', '.');
             $total = number_format($request->total ?? 0, 2, ',', '.');
-
-            // Generar datos de pago
+         
             $datosPago = $this->generarDatosPago($metodoPago);
 
-            // Texto especial según tipo
             $textoTipo = $tipoFactura === 'suscripcion'
                 ? '<p style="background: #fff3cd; padding: 10px; border-left: 4px solid #ffc107; margin: 20px 0;"><strong>SUSCRIPCIÓN ACTIVA:</strong> Este pedido forma parte de tu suscripción recurrente.</p>'
                 : '';
 
-            // Generar filas de productos
             $productosHtml = '';
             foreach ($productos as $prod) {
                 $nombreProd = htmlspecialchars($prod['nombre'] ?? 'Producto', ENT_QUOTES, 'UTF-8');
@@ -97,7 +85,6 @@ class FacturaController extends Controller
                     </tr>";
             }
 
-            // HTML completo
             $html = $this->generarHtmlFactura(
                 $vendedorNombre,
                 $vendedorDireccion,

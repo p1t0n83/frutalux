@@ -15,10 +15,8 @@ class PedidoController extends Controller
 
     public function misPedidos(Request $request)
     {
-        // Obtener el usuario autenticado
         $userId = $request->user()->id;
 
-        // Devolver solo los pedidos de ese cliente
         $pedidos = Pedido::with('detalles', 'pagos')
             ->where('user_id', $userId)
             ->get();

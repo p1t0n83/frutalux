@@ -10,7 +10,7 @@ const AGRICULTORES_DATA = [
     especialidad: "Tomates y Hortalizas",
     experiencia: "25 años",
     descripcion: "Tercera generación de agricultores, especializado en tomates Raf y hortalizas de calidad. Cultivo tradicional con técnicas sostenibles.",
-    imagen: "/img/logo-texto.jpg"
+    imagen: "/img/jose.jpg"
   },
   {
     id: 2,
@@ -20,7 +20,7 @@ const AGRICULTORES_DATA = [
     especialidad: "Naranjas y Mandarinas",
     experiencia: "30 años",
     descripcion: "Experta en cítricos valencianos. Sus naranjas son reconocidas por su sabor excepcional. Agricultura ecológica certificada.",
-    imagen: "/img/logo-texto.jpg"
+    imagen: "/img/carmen.jpg"
   },
   {
     id: 3,
@@ -30,7 +30,7 @@ const AGRICULTORES_DATA = [
     especialidad: "Pimientos y Espárragos",
     experiencia: "35 años",
     descripcion: "Maestro del cultivo de pimientos del piquillo...",
-    imagen: "/img/logo-texto.jpg"
+    imagen: "/img/pedro.jpg"
   },
   {
     id: 4,
@@ -40,7 +40,7 @@ const AGRICULTORES_DATA = [
     especialidad: "Fresas y Frutos Rojos",
     experiencia: "18 años",
     descripcion: "Especialista en fresas y frutos rojos...",
-    imagen: "/img/logo-texto.jpg"
+    imagen: "/img/laura.jpg"
   }
 ];
 

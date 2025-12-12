@@ -39,7 +39,7 @@ class AuthController extends Controller
             'codigo_postal' => $validated['codigo_postal'] ?? null,
             'localidad' => $validated['localidad'] ?? null,
             'provincia' => $validated['provincia'] ?? null,
-            'tipo_usuario' => 'cliente', // Por defecto cliente
+            'tipo_usuario' => 'cliente',
             'activo' => true,
             'slug' => Str::slug($validated['nombre'] . '-' . $validated['apellidos']),
         ]);
@@ -74,7 +74,7 @@ class AuthController extends Controller
             ->where('email', $request->email)
             ->firstOrFail();
 
-        // Verificar si el usuario está activo
+        
         if (!$user->activo) {
             throw ValidationException::withMessages([
                 'email' => ['Tu cuenta ha sido desactivada. Contacta al administrador.'],

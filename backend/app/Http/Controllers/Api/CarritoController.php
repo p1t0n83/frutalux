@@ -9,37 +9,37 @@ use Illuminate\Http\Request;
 
 class CarritoController extends Controller
 {
-    // Devuelve todos los carritos (solo para administración)
+
     public function index()
     {
         return Carrito::with('usuario', 'items.producto')->get();
     }
 
-    // Devuelve el carrito del usuario autenticado, lo crea si no existe
+   
     public function show(Request $request)
     {
         $user = $request->user();
 
         $carrito = Carrito::firstOrCreate(
             ['user_id' => $user->id],
-            ['estado' => 'activo'] // si tienes campo estado
+            ['estado' => 'activo'] 
         );
 
         return response()->json($carrito->load('usuario', 'items.producto'));
     }
 
-    // Actualiza datos del carrito (ej: cambiar user_id si fuese necesario)
+    
     public function update(Request $request)
     {
         $user = $request->user();
         $carrito = Carrito::firstOrCreate(['user_id' => $user->id]);
 
-        $carrito->update($request->only('estado')); // ejemplo si quieres actualizar estado
+        $carrito->update($request->only('estado'));
 
         return response()->json($carrito->load('usuario', 'items.producto'));
     }
 
-    // Elimina el carrito del usuario autenticado
+    
     public function destroy(Request $request)
     {
         $user = $request->user();
