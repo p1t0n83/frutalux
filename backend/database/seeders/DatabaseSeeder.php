@@ -14,7 +14,8 @@ class DatabaseSeeder extends Seeder
             CategoriaSeeder::class,
             ProductoSeeder::class,
             UserSeeder::class,
-            ValoracionSeeder::class
+            ValoracionSeeder::class,
+            ImagenesProductoSeeder::class
         ]);
     }
 }

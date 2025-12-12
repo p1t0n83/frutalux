@@ -1,4 +1,4 @@
-const API_BASE = import.meta.env.VITE_API_URL || "http://api.frutalux.duckdns.org/api";
+const API_BASE = "http://frutalux.duckdns.org/api";
 
 /**
  * Obtener token de autenticación

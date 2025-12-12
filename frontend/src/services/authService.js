@@ -1,5 +1,5 @@
 // src/services/authService.js
-const API_BASE = "http://api.frutalux.duckdns.orgapi";
+const API_BASE = "http://frutalux.duckdns.org/api";
 const TOKEN_KEY = "token";
 
 // ================================================

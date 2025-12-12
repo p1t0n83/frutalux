@@ -1,7 +1,7 @@
 // src/services/adminService.js
 import { Users, Package, ShoppingBag, TrendingUp } from "lucide-react";
 
-const API_BASE = "http://api.frutalux.duckdns.org/api";
+const API_BASE = "http://frutalux.duckdns.org/api";
 
 const STATS_CONFIG = [
   { titulo: "Usuarios Totales", key: "usuarios", icon: Users, color: "blue" },
