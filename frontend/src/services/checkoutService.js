@@ -1,4 +1,4 @@
-const API_BASE = "http://frutalux.duckdns.orgapi";
+const API_BASE = "https://frutalux.duckdns.org/api";
 
 /**
  * Función auxiliar para hacer peticiones a la API

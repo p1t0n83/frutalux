@@ -3,17 +3,29 @@ import { Link } from "react-router-dom";
 import { MapPin } from "lucide-react";
 import { getProductos } from "../services/productoService";
 import "../styles/CatalogoPage.css";
+import { getCategorias } from "../services/categoriaService";
 
-const CATEGORIAS = ["all", "Frutas con hueso", "Verduras", "Hortalizas", "Legumbres", "Cítricos"];
 
 export default function CatalogoPage() {
   const [productos, setProductos] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [loading, setLoading] = useState(true);
-
+  const [categorias, setCategorias] = useState(["all"]);
+  
   useEffect(() => {
-    const cargarProductos = async () => {
+    const cargarCategorias = async () => {
+    try {
+      const data = await getCategorias();
+      const nombres = data.map((c) => c.nombre);
+      setCategorias(["all", ...nombres]);
+    } catch (error) {
+      console.error("Error cargando categorías:", error);
+    }
+  };
+   cargarCategorias();  
+
+      const cargarProductos = async () => {
       try {
         const data = await getProductos();
         setProductos(data);
@@ -67,7 +79,7 @@ export default function CatalogoPage() {
         </div>
 
         <div className="filter-buttons">
-          {CATEGORIAS.map((categoria) => (
+          {categorias.map((categoria) => (
             <button
               key={categoria}
               onClick={() => setSelectedCategory(categoria)}
