@@ -118,10 +118,16 @@ class FacturaController extends Controller
             // Guardar
             $filename = "Factura-{$numero}.pdf";
             $pdfOutput = $pdf->output();
-            Storage::disk('public')->put("facturas/{$filename}", $pdfOutput);
+	    $path = public_path('facturas');
+	    if (!file_exists($path)) {
+    		mkdir($path, 0755, true);
+	    }
+	    file_put_contents("{$path}/{$filename}", $pdfOutput);
 
+	    // Actualizar la URL en la base de datos (si la guardas)
+            $facturaUrl = "/facturas/{$filename}";
             $pedido->update([
-                'factura_url' => url("storage/facturas/{$filename}")
+                'factura_url' => "/facturas/{$filename}"
             ]);
 
             return response($pdfOutput, 200)

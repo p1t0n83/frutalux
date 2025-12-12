@@ -212,7 +212,7 @@ export default function DetalleProductoAdminPage() {
                 />
                 <button
                   type="button"
-                  className="btn-delete"
+                  className="btn-delete-img"
                   onClick={() => handleDeleteImage(imagen.id)}
                 >
                   <Trash2 className="w-4 h-4" /> Borrar
