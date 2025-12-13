@@ -9,6 +9,7 @@ import {
   addProductoImagen,
   deleteProductoImagen,
 } from "../services/productoService";
+import { getCategorias } from "../services/categoriaService";
 import "../styles/DetalleProductoAdmin.css";
 
 const FORM_INICIAL = {
@@ -37,9 +38,23 @@ export default function DetalleProductoAdminPage() {
 
   const [formData, setFormData] = useState(FORM_INICIAL);
   const [imagenes, setImagenes] = useState([]);
+  const [categorias, setCategorias] = useState([]);
   const [loading, setLoading] = useState(!!id);
   const [error, setError] = useState(null);
   const [productoId, setProductoId] = useState(id);
+
+  useEffect(() => {
+    const cargarCategorias = async () => {
+      try {
+        const data = await getCategorias();
+        setCategorias(data);
+      } catch (err) {
+        console.error("Error al cargar categorías:", err);
+      }
+    };
+
+    cargarCategorias();
+  }, []);
 
   useEffect(() => {
     if (!id) return;
@@ -179,6 +194,21 @@ export default function DetalleProductoAdminPage() {
             value={formData.slug}
             onChange={handleChange}
           />
+        </div>
+        <div>
+          <label>Categoría</label>
+          <select
+            name="categoria"
+            value={formData.categoria}
+            onChange={handleChange}
+          >
+            <option value="">Seleccionar categoría</option>
+            {categorias.map((cat) => (
+              <option key={cat.id} value={cat.nombre}>
+                {cat.nombre}
+              </option>
+            ))}
+          </select>
         </div>
         <div>
           <label>Precio/kg</label>
