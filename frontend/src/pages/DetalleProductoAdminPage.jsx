@@ -48,6 +48,7 @@ export default function DetalleProductoAdminPage() {
       try {
         const data = await getCategorias();
         setCategorias(data);
+        console.log('Categorías cargadas:', data);
       } catch (err) {
         console.error("Error al cargar categorías:", err);
       }
@@ -92,6 +93,7 @@ export default function DetalleProductoAdminPage() {
     
     if (name === 'categoria_id') {
       finalValue = value === '' ? '' : Number(value);
+      console.log('Categoría cambiada:', { value, finalValue, tipo: typeof finalValue });
     } else if (name === 'stock_kg') {
       finalValue = value === '' ? '' : parseInt(value);
     } else if (name === 'precio_kg') {
@@ -235,6 +237,14 @@ export default function DetalleProductoAdminPage() {
           />
         </div>
         <div>
+          <label>Origen</label>
+          <input
+            name="origen"
+            value={formData.origen}
+            onChange={handleChange}
+          />
+        </div>
+        <div>
           <label>Slug</label>
           <input
             name="slug"
@@ -278,39 +288,37 @@ export default function DetalleProductoAdminPage() {
         </div>
       </form>
 
-      <div className="form-section">
-        <div className="flex items-center gap-2 mb-4">
-          <ImageIcon className="w-5 h-5 text-green-800" />
-          <h2 className="text-xl font-bold text-gray-900">Imágenes</h2>
+      {productoId && (
+        <div className="form-section">
+          <div className="flex items-center gap-2 mb-4">
+            <ImageIcon className="w-5 h-5 text-green-800" />
+            <h2 className="text-xl font-bold text-gray-900">Imágenes</h2>
+          </div>
+          <div className="imagenes-grid">
+            {imagenes.map((imagen) => (
+              <div key={imagen.id} className="imagen-item">
+                <img
+                  src={imagen.url_imagen}
+                  alt={formData.nombre}
+                  className="imagen-preview"
+                />
+                <button
+                  type="button"
+                  className="btn-delete-img"
+                  onClick={() => handleDeleteImage(imagen.id)}
+                >
+                  <Trash2 className="w-4 h-4" /> Borrar
+                </button>
+              </div>
+            ))}
+          </div>
+          <input 
+            type="file" 
+            accept="image/*" 
+            onChange={handleAddImage}
+          />
         </div>
-        {!productoId && (
-          <p className="text-gray-600 mb-4">Guarda el producto primero para añadir imágenes</p>
-        )}
-        <div className="imagenes-grid">
-          {imagenes.map((imagen) => (
-            <div key={imagen.id} className="imagen-item">
-              <img
-                src={imagen.url_imagen}
-                alt={formData.nombre}
-                className="imagen-preview"
-              />
-              <button
-                type="button"
-                className="btn-delete-img"
-                onClick={() => handleDeleteImage(imagen.id)}
-              >
-                <Trash2 className="w-4 h-4" /> Borrar
-              </button>
-            </div>
-          ))}
-        </div>
-        <input 
-          type="file" 
-          accept="image/*" 
-          onChange={handleAddImage}
-          disabled={!productoId}
-        />
-      </div>
+      )}
     </div>
   );
 }
