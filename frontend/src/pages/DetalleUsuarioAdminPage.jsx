@@ -176,21 +176,19 @@ export default function DetalleUsuarioAdmin() {
               )}
             </div>
 
-            {!id && (
-              <div>
-                <label>Contraseña</label>
-                <input
-                  type="password"
-                  name="password"
-                  value={formData.password}
-                  onChange={handleChange}
-                  className={validationErrors.password ? "input-error" : ""}
-                />
-                {validationErrors.password && (
-                  <p className="error-text">{validationErrors.password}</p>
-                )}
-              </div>
-            )}
+            <div>
+              <label>Contraseña{id && " (opcional)"}</label>
+              <input
+                type="password"
+                name="password"
+                value={formData.password}
+                onChange={handleChange}
+                className={validationErrors.password ? "input-error" : ""}
+              />
+              {validationErrors.password && (
+                <p className="error-text">{validationErrors.password}</p>
+              )}
+            </div>
 
             <div>
               <label>Teléfono</label>
