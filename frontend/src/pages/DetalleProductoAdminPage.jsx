@@ -15,7 +15,7 @@ import "../styles/DetalleProductoAdmin.css";
 const FORM_INICIAL = {
   nombre: "",
   descripcion: "",
-  nombreProductor: "",
+  nombre_productor: "",
   origen: "",
   categoria: "",
   categoria_id: "",
@@ -78,11 +78,26 @@ export default function DetalleProductoAdminPage() {
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData({ ...formData, [name]: value });
+    let finalValue = value;
+    
+    if (name === 'categoria_id') {
+      finalValue = value === '' ? '' : Number(value);
+    } else if (name === 'stock_kg') {
+      finalValue = value === '' ? '' : parseInt(value);
+    } else if (name === 'precio_kg') {
+      finalValue = value === '' ? '' : parseFloat(value);
+    }
+    
+    setFormData({ ...formData, [name]: finalValue });
   };
 
   const handleSave = async () => {
     try {
+      if (!formData.categoria_id) {
+        setError("Debes seleccionar una categoría");
+        return;
+      }
+      
       if (productoId) {
         await updateProducto(productoId, formData);
       } else {
@@ -225,7 +240,6 @@ export default function DetalleProductoAdminPage() {
           <label>Stock (kg)</label>
           <input
             type="number"
-            step="0.1"
             name="stock_kg"
             value={formData.stock_kg}
             onChange={handleChange}
