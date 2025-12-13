@@ -17,7 +17,6 @@ const FORM_INICIAL = {
   descripcion: "",
   nombre_productor: "",
   origen: "",
-  categoria: "",
   categoria_id: "",
   temporada: "",
   certificaciones: "",
@@ -63,7 +62,18 @@ export default function DetalleProductoAdminPage() {
     const cargarProducto = async () => {
       try {
         const data = await getProducto(id);
-        setFormData({ ...FORM_INICIAL, ...data });
+        
+        // Si viene categoria como objeto, extraer el id
+        let categoriaId = data.categoria_id;
+        if (data.categoria && typeof data.categoria === 'object') {
+          categoriaId = data.categoria.id;
+        }
+        
+        setFormData({ 
+          ...FORM_INICIAL, 
+          ...data,
+          categoria_id: categoriaId 
+        });
         setImagenes(data.imagenes || []);
       } catch (err) {
         console.error("Error al cargar producto:", err);
@@ -93,20 +103,41 @@ export default function DetalleProductoAdminPage() {
 
   const handleSave = async () => {
     try {
+      console.log('FormData antes de validar:', formData);
+      
       if (!formData.categoria_id) {
         setError("Debes seleccionar una categoría");
         return;
       }
+
+      // Preparar datos para enviar solo los campos requeridos
+      const dataToSend = {
+        categoria_id: Number(formData.categoria_id),
+        nombre: formData.nombre || '',
+        slug: formData.slug || '',
+        precio_kg: Number(formData.precio_kg) || 0,
+        stock_kg: parseInt(formData.stock_kg) || 0,
+      };
+
+      // Añadir campos opcionales solo si tienen valor
+      if (formData.nombre_productor) dataToSend.nombre_productor = formData.nombre_productor;
+      if (formData.descripcion) dataToSend.descripcion = formData.descripcion;
+      
+      console.log('Datos a enviar:', dataToSend);
+      console.log('categoria_id tipo:', typeof dataToSend.categoria_id);
+      console.log('categoria_id valor:', dataToSend.categoria_id);
       
       if (productoId) {
-        await updateProducto(productoId, formData);
+        await updateProducto(productoId, dataToSend);
       } else {
-        const nuevoProducto = await createProducto(formData);
+        const nuevoProducto = await createProducto(dataToSend);
         setProductoId(nuevoProducto.id);
       }
+      
+      setError(null);
     } catch (err) {
-      console.error("Error al guardar producto:", err);
-      setError("Error al guardar producto");
+      console.error("Error completo:", err);
+      setError(err.message || "Error al guardar producto");
     }
   };
 
