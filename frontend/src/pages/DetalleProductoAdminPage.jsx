@@ -18,6 +18,7 @@ const FORM_INICIAL = {
   nombreProductor: "",
   origen: "",
   categoria: "",
+  categoria_id: "",
   temporada: "",
   certificaciones: "",
   slug: "",
@@ -198,13 +199,13 @@ export default function DetalleProductoAdminPage() {
         <div>
           <label>Categoría</label>
           <select
-            name="categoria"
-            value={formData.categoria}
+            name="categoria_id"
+            value={formData.categoria_id}
             onChange={handleChange}
           >
             <option value="">Seleccionar categoría</option>
             {categorias.map((cat) => (
-              <option key={cat.id} value={cat.nombre}>
+              <option key={cat.id} value={cat.id}>
                 {cat.nombre}
               </option>
             ))}
