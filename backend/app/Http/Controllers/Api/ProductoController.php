@@ -1,285 +1,60 @@
-import { useState, useEffect } from "react";
-import { useParams, useNavigate, Link } from "react-router-dom";
-import { ArrowLeft, Save, Trash2, Image as ImageIcon } from "lucide-react";
-import {
-  getProducto,
-  createProducto,
-  updateProducto,
-  deleteProducto,
-  addProductoImagen,
-  deleteProductoImagen,
-} from "../services/productoService";
-import { getCategorias } from "../services/categoriaService";
-import "../styles/DetalleProductoAdmin.css";
+<?php
 
-const FORM_INICIAL = {
-  nombre: "",
-  descripcion: "",
-  nombre_productor: "",
-  origen: "",
-  categoria: "",
-  categoria_id: "",
-  temporada: "",
-  certificaciones: "",
-  slug: "",
-  precio_kg: "",
-  stock_kg: "",
-  stock_minimo: "",
-  precio_oferta: "",
-  descuento: "",
-  coste_produccion: "",
-  activo: true,
-  destacado: false,
-  visible_catalogo: true,
-};
+namespace App\Http\Controllers\Api;
 
-export default function DetalleProductoAdminPage() {
-  const { id } = useParams();
-  const navigate = useNavigate();
+use App\Http\Controllers\Controller;
+use App\Models\Producto;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 
-  const [formData, setFormData] = useState(FORM_INICIAL);
-  const [imagenes, setImagenes] = useState([]);
-  const [categorias, setCategorias] = useState([]);
-  const [loading, setLoading] = useState(!!id);
-  const [error, setError] = useState(null);
-  const [productoId, setProductoId] = useState(id);
-
-  useEffect(() => {
-    const cargarCategorias = async () => {
-      try {
-        const data = await getCategorias();
-        setCategorias(data);
-      } catch (err) {
-        console.error("Error al cargar categorías:", err);
-      }
-    };
-
-    cargarCategorias();
-  }, []);
-
-  useEffect(() => {
-    if (!id) return;
-
-    const cargarProducto = async () => {
-      try {
-        const data = await getProducto(id);
-        setFormData({ ...FORM_INICIAL, ...data });
-        setImagenes(data.imagenes || []);
-      } catch (err) {
-        console.error("Error al cargar producto:", err);
-        setError("Error al cargar producto");
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    cargarProducto();
-  }, [id]);
-
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    let finalValue = value;
-    
-    if (name === 'categoria_id') {
-      finalValue = value === '' ? '' : Number(value);
-    } else if (name === 'stock_kg') {
-      finalValue = value === '' ? '' : parseInt(value);
-    } else if (name === 'precio_kg') {
-      finalValue = value === '' ? '' : parseFloat(value);
-    }
-    
-    setFormData({ ...formData, [name]: finalValue });
-  };
-
-  const handleSave = async () => {
-    try {
-      if (!formData.categoria_id) {
-        setError("Debes seleccionar una categoría");
-        return;
-      }
-      
-      if (productoId) {
-        await updateProducto(productoId, formData);
-      } else {
-        const nuevoProducto = await createProducto(formData);
-        setProductoId(nuevoProducto.id);
-      }
-    } catch (err) {
-      console.error("Error al guardar producto:", err);
-      setError("Error al guardar producto");
-    }
-  };
-
-  const handleDelete = async () => {
-    if (!window.confirm("¿Estás seguro de eliminar este producto?")) {
-      return;
+class ProductoController extends Controller
+{
+    public function index()
+    {
+        return Producto::with('categoria', 'imagenes', 'valoraciones')->get();
     }
 
-    try {
-      await deleteProducto(productoId);
-      navigate("/gestion-productos");
-    } catch (err) {
-      console.error("Error al eliminar producto:", err);
-      setError("Error al eliminar producto");
-    }
-  };
+    public function store(Request $request)
+    {
+        $validated = $request->validate([
+            'categoria_id' => 'required|exists:categorias,id',
+            'nombre' => 'required|string|max:255',
+            'slug' => 'required|string|unique:productos,slug',
+            'nombre_productor' => 'nullable|string|max:255',
+            'precio_kg' => 'required|numeric|min:0',
+            'stock_kg' => 'required|integer|min:0',
+        ]);
 
-  const handleAddImage = async (e) => {
-    const file = e.target.files[0];
-    if (!file) return;
-
-    if (!productoId) {
-      setError("Debes guardar el producto antes de añadir imágenes");
-      return;
+        $producto = Producto::create($validated);
+        return response()->json($producto, 201);
     }
 
-    try {
-      const nuevaImagen = await addProductoImagen(productoId, file);
-      setImagenes((prevImagenes) => [...prevImagenes, nuevaImagen]);
-      e.target.value = "";
-    } catch (err) {
-      console.error("Error al subir imagen:", err);
-      setError("Error al subir imagen");
-    }
-  };
-
-  const handleDeleteImage = async (imagenId) => {
-    if (!window.confirm("¿Estás seguro de eliminar esta imagen?")) {
-      return;
+    public function show($id)
+    {
+        return Producto::with('categoria', 'imagenes', 'valoraciones')->findOrFail($id);
     }
 
-    try {
-      await deleteProductoImagen(productoId, imagenId);
-      setImagenes((prevImagenes) => prevImagenes.filter((img) => img.id !== imagenId));
-    } catch (err) {
-      console.error("Error al borrar imagen:", err);
-      setError("Error al borrar imagen");
+    public function update(Request $request, $id)
+    {
+        $producto = Producto::findOrFail($id);
+        $producto->update($request->all());
+        return response()->json($producto);
     }
-  };
 
-  if (loading) {
-    return <p>Cargando producto...</p>;
-  }
+    public function destroy($id)
+    {
+        $producto = Producto::with('imagenes')->findOrFail($id);
 
-  if (error) {
-    return <p className="error-popup">{error}</p>;
-  }
+        foreach ($producto->imagenes as $imagen) {
+            if ($imagen->nombre_imagen) {
+                Storage::disk('public')->delete('imagenes/' . $imagen->nombre_imagen);
+            }
+        }
 
-  return (
-    <div className="detalle-container">
-      <div className="detalle-header">
-        <Link to="/gestion-productos">
-          <button className="btn-back">
-            <ArrowLeft className="w-6 h-6" />
-          </button>
-        </Link>
-        <h1>{productoId ? "Editar Producto" : "Nuevo Producto"}</h1>
-        <div className="acciones">
-          {productoId && (
-            <button className="btn-delete" onClick={handleDelete}>
-              <Trash2 className="w-5 h-5" /> Eliminar
-            </button>
-          )}
-          <button className="btn-save" onClick={handleSave}>
-            <Save className="w-5 h-5" /> Guardar
-          </button>
-        </div>
-      </div>
+        Storage::disk('public')->deleteDirectory('imagenes/producto_' . $producto->id);
 
-      <form className="form-section" onSubmit={(e) => e.preventDefault()}>
-        <div>
-          <label>Nombre</label>
-          <input
-            name="nombre"
-            value={formData.nombre}
-            onChange={handleChange}
-          />
-        </div>
-        <div>
-          <label>Descripción</label>
-          <textarea
-            name="descripcion"
-            value={formData.descripcion}
-            onChange={handleChange}
-          />
-        </div>
-        <div>
-          <label>Slug</label>
-          <input
-            name="slug"
-            value={formData.slug}
-            onChange={handleChange}
-          />
-        </div>
-        <div>
-          <label>Categoría</label>
-          <select
-            name="categoria_id"
-            value={formData.categoria_id}
-            onChange={handleChange}
-          >
-            <option value="">Seleccionar categoría</option>
-            {categorias.map((cat) => (
-              <option key={cat.id} value={cat.id}>
-                {cat.nombre}
-              </option>
-            ))}
-          </select>
-        </div>
-        <div>
-          <label>Precio/kg</label>
-          <input
-            type="number"
-            step="0.01"
-            name="precio_kg"
-            value={formData.precio_kg}
-            onChange={handleChange}
-          />
-        </div>
-        <div>
-          <label>Stock (kg)</label>
-          <input
-            type="number"
-            name="stock_kg"
-            value={formData.stock_kg}
-            onChange={handleChange}
-          />
-        </div>
-      </form>
+        $producto->delete();
 
-      <div className="form-section">
-        <div className="flex items-center gap-2 mb-4">
-          <ImageIcon className="w-5 h-5 text-green-800" />
-          <h2 className="text-xl font-bold text-gray-900">Imágenes</h2>
-        </div>
-        {!productoId && (
-          <p className="text-gray-600 mb-4">Guarda el producto primero para añadir imágenes</p>
-        )}
-        <div className="imagenes-grid">
-          {imagenes.map((imagen) => (
-            <div key={imagen.id} className="imagen-item">
-              <img
-                src={imagen.url_imagen}
-                alt={formData.nombre}
-                className="imagen-preview"
-              />
-              <button
-                type="button"
-                className="btn-delete-img"
-                onClick={() => handleDeleteImage(imagen.id)}
-              >
-                <Trash2 className="w-4 h-4" /> Borrar
-              </button>
-            </div>
-          ))}
-        </div>
-        <input 
-          type="file" 
-          accept="image/*" 
-          onChange={handleAddImage}
-          disabled={!productoId}
-        />
-      </div>
-    </div>
-  );
+        return response()->json(['message' => 'Producto e imágenes eliminados'], 200);
+    }
 }
