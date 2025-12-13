@@ -1,5 +1,5 @@
 // src/services/authService.js
-const API_BASE = "https://frutalux.duckdns.org/api";
+const API_BASE = "http://localhost:8000/api";
 const TOKEN_KEY = "token";
 
 // ================================================

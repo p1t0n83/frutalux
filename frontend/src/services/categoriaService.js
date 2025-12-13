@@ -1,4 +1,4 @@
-const API_URL = 'https://frutalux.duckdns.org/api';
+const API_URL = 'http://localhost:8000/api';
 
 export async function getCategorias() {
   try {

@@ -1,4 +1,4 @@
-const API_BASE = "https://frutalux.duckdns.org/api";
+const API_BASE = "http://localhost:8000/api";
 
 /**
  * Obtener token de autenticación

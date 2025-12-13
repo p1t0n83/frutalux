@@ -5,7 +5,7 @@
 
     <IfModule mod_headers.c>
         # CORS Headers
-        Header always set Access-Control-Allow-Origin "http://frutalux.duckdns.org"
+        Header always set Access-Control-Allow-Origin "http://localhost:8000"
         Header always set Access-Control-Allow-Methods "GET, POST, PUT, DELETE, OPTIONS, PATCH"
         Header always set Access-Control-Allow-Headers "Content-Type, Authorization, X-Requested-With, Accept, X-XSRF-TOKEN"
         Header always set Access-Control-Allow-Credentials "true"
