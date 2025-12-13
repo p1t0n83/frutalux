@@ -39,6 +39,7 @@ export default function DetalleProductoAdminPage() {
   const [imagenes, setImagenes] = useState([]);
   const [loading, setLoading] = useState(!!id);
   const [error, setError] = useState(null);
+  const [productoId, setProductoId] = useState(id);
 
   useEffect(() => {
     if (!id) return;
@@ -66,12 +67,12 @@ export default function DetalleProductoAdminPage() {
 
   const handleSave = async () => {
     try {
-      if (id) {
-        await updateProducto(id, formData);
+      if (productoId) {
+        await updateProducto(productoId, formData);
       } else {
-        await createProducto(formData);
+        const nuevoProducto = await createProducto(formData);
+        setProductoId(nuevoProducto.id);
       }
-      navigate("/gestion-productos");
     } catch (err) {
       console.error("Error al guardar producto:", err);
       setError("Error al guardar producto");
@@ -84,7 +85,7 @@ export default function DetalleProductoAdminPage() {
     }
 
     try {
-      await deleteProducto(id);
+      await deleteProducto(productoId);
       navigate("/gestion-productos");
     } catch (err) {
       console.error("Error al eliminar producto:", err);
@@ -96,8 +97,13 @@ export default function DetalleProductoAdminPage() {
     const file = e.target.files[0];
     if (!file) return;
 
+    if (!productoId) {
+      setError("Debes guardar el producto antes de añadir imágenes");
+      return;
+    }
+
     try {
-      const nuevaImagen = await addProductoImagen(id, file);
+      const nuevaImagen = await addProductoImagen(productoId, file);
       setImagenes((prevImagenes) => [...prevImagenes, nuevaImagen]);
       e.target.value = "";
     } catch (err) {
@@ -112,7 +118,7 @@ export default function DetalleProductoAdminPage() {
     }
 
     try {
-      await deleteProductoImagen(id, imagenId);
+      await deleteProductoImagen(productoId, imagenId);
       setImagenes((prevImagenes) => prevImagenes.filter((img) => img.id !== imagenId));
     } catch (err) {
       console.error("Error al borrar imagen:", err);
@@ -136,9 +142,9 @@ export default function DetalleProductoAdminPage() {
             <ArrowLeft className="w-6 h-6" />
           </button>
         </Link>
-        <h1>{id ? "Editar Producto" : "Nuevo Producto"}</h1>
+        <h1>{productoId ? "Editar Producto" : "Nuevo Producto"}</h1>
         <div className="acciones">
-          {id && (
+          {productoId && (
             <button className="btn-delete" onClick={handleDelete}>
               <Trash2 className="w-5 h-5" /> Eliminar
             </button>
@@ -196,33 +202,39 @@ export default function DetalleProductoAdminPage() {
         </div>
       </form>
 
-      {id && (
-        <div className="form-section">
-          <div className="flex items-center gap-2 mb-4">
-            <ImageIcon className="w-5 h-5 text-green-800" />
-            <h2 className="text-xl font-bold text-gray-900">Imágenes</h2>
-          </div>
-          <div className="imagenes-grid">
-            {imagenes.map((imagen) => (
-              <div key={imagen.id} className="imagen-item">
-                <img
-                  src={imagen.url_imagen}
-                  alt={formData.nombre}
-                  className="imagen-preview"
-                />
-                <button
-                  type="button"
-                  className="btn-delete-img"
-                  onClick={() => handleDeleteImage(imagen.id)}
-                >
-                  <Trash2 className="w-4 h-4" /> Borrar
-                </button>
-              </div>
-            ))}
-          </div>
-          <input type="file" accept="image/*" onChange={handleAddImage} />
+      <div className="form-section">
+        <div className="flex items-center gap-2 mb-4">
+          <ImageIcon className="w-5 h-5 text-green-800" />
+          <h2 className="text-xl font-bold text-gray-900">Imágenes</h2>
         </div>
-      )}
+        {!productoId && (
+          <p className="text-gray-600 mb-4">Guarda el producto primero para añadir imágenes</p>
+        )}
+        <div className="imagenes-grid">
+          {imagenes.map((imagen) => (
+            <div key={imagen.id} className="imagen-item">
+              <img
+                src={imagen.url_imagen}
+                alt={formData.nombre}
+                className="imagen-preview"
+              />
+              <button
+                type="button"
+                className="btn-delete-img"
+                onClick={() => handleDeleteImage(imagen.id)}
+              >
+                <Trash2 className="w-4 h-4" /> Borrar
+              </button>
+            </div>
+          ))}
+        </div>
+        <input 
+          type="file" 
+          accept="image/*" 
+          onChange={handleAddImage}
+          disabled={!productoId}
+        />
+      </div>
     </div>
   );
 }
