@@ -1,72 +1,75 @@
 import { useState, useEffect } from "react";
-import { User, Package, Lock, Save, Calendar, Truck, CreditCard } from "lucide-react";
+import { User, Package, Lock, Save, Calendar, Truck, CreditCard, RefreshCw } from "lucide-react";
 import {
   getPerfilCliente,
   updatePerfilCliente,
   updatePasswordCliente,
 } from "../services/perfilClienteService";
 import { getMisPedidos } from "../services/pedidoService";
+import { getMisSuscripciones, cancelarSuscripcion } from "../services/SuscripcionService";
 import "../styles/PerfilCliente.css";
 
 const TABS = [
-  { id: "datos", nombre: "MIS DATOS", icon: User },
-  { id: "pedidos", nombre: "PEDIDOS", icon: Package },
-  { id: "seguridad", nombre: "SEGURIDAD", icon: Lock },
+  { id: "datos",         nombre: "MIS DATOS",       icon: User        },
+  { id: "pedidos",       nombre: "PEDIDOS",          icon: Package     },
+  { id: "suscripciones", nombre: "SUSCRIPCIONES",    icon: RefreshCw   },
+  { id: "seguridad",     nombre: "SEGURIDAD",        icon: Lock        },
 ];
 
-const CAMPOS = [
-  "nombre",
-  "apellidos",
-  "email",
-  "telefono",
-  "direccion",
-  "localidad",
-];
+const CAMPOS = ["nombre", "apellidos", "email", "telefono", "direccion", "localidad"];
 
-const ESTADOS = {
-  pendiente: { color: "#ffc107", bg: "#fff3cd", text: "Pendiente" },
-  pagado: { color: "#28a745", bg: "#d4edda", text: "Pagado" },
-  enviado: { color: "#17a2b8", bg: "#d1ecf1", text: "Enviado" },
-  entregado: { color: "#28a745", bg: "#d4edda", text: "Entregado" },
-  cancelado: { color: "#dc3545", bg: "#f8d7da", text: "Cancelado" },
+const ESTADOS_PEDIDO = {
+  pendiente:  { color: "#ffc107", bg: "#fff3cd", text: "Pendiente"  },
+  pagado:     { color: "#28a745", bg: "#d4edda", text: "Pagado"     },
+  enviado:    { color: "#17a2b8", bg: "#d1ecf1", text: "Enviado"    },
+  entregado:  { color: "#28a745", bg: "#d4edda", text: "Entregado"  },
+  cancelado:  { color: "#dc3545", bg: "#f8d7da", text: "Cancelado"  },
+};
+
+const ESTADOS_SUSCRIPCION = {
+  activa:    { color: "#28a745", bg: "#d4edda", text: "Activa"    },
+  cancelada: { color: "#dc3545", bg: "#f8d7da", text: "Cancelada" },
+  pausada:   { color: "#ffc107", bg: "#fff3cd", text: "Pausada"   },
 };
 
 export default function PerfilCliente() {
-  const [activeTab, setActiveTab] = useState("datos");
-  const [formData, setFormData] = useState(null);
-  const [pedidos, setPedidos] = useState([]);
-  const [loadingPedidos, setLoadingPedidos] = useState(false);
+  const [activeTab, setActiveTab]       = useState("datos");
+  const [formData, setFormData]         = useState(null);
+  const [pedidos, setPedidos]           = useState([]);
+  const [suscripciones, setSuscripciones] = useState([]);
+  const [loadingPedidos, setLoadingPedidos]           = useState(false);
+  const [loadingSuscripciones, setLoadingSuscripciones] = useState(false);
 
-  const [datosSuccess, setDatosSuccess] = useState("");
-  const [datosError, setDatosError] = useState("");
+  const [datosSuccess, setDatosSuccess]       = useState("");
+  const [datosError, setDatosError]           = useState("");
   const [seguridadSuccess, setSeguridadSuccess] = useState("");
-  const [seguridadError, setSeguridadError] = useState("");
+  const [seguridadError, setSeguridadError]   = useState("");
 
   const [passwordData, setPasswordData] = useState({
-    currentPassword: "",
-    newPassword: "",
-    confirmPassword: "",
+    currentPassword: "", newPassword: "", confirmPassword: "",
   });
 
+  // Cargar perfil al montar
   useEffect(() => {
     const cargarPerfil = async () => {
       try {
         const user = await getPerfilCliente();
         setFormData({
-          nombre: user.nombre,
+          nombre:    user.nombre,
           apellidos: user.apellidos,
-          email: user.email,
-          telefono: user.telefono || "",
+          email:     user.email,
+          telefono:  user.telefono  || "",
           direccion: user.direccion || "",
           localidad: user.localidad || "",
         });
-      } catch (err) {
+      } catch {
         setDatosError("Error al cargar perfil");
       }
     };
     cargarPerfil();
   }, []);
 
+  // Cargar pedidos al cambiar a esa tab
   useEffect(() => {
     if (activeTab === "pedidos") {
       const cargarPedidos = async () => {
@@ -74,14 +77,31 @@ export default function PerfilCliente() {
         try {
           const data = await getMisPedidos();
           setPedidos(data || []);
-        } catch (err) {
-          console.error("Error al cargar pedidos:", err);
+        } catch {
           setPedidos([]);
         } finally {
           setLoadingPedidos(false);
         }
       };
       cargarPedidos();
+    }
+  }, [activeTab]);
+
+  // Cargar suscripciones al cambiar a esa tab
+  useEffect(() => {
+    if (activeTab === "suscripciones") {
+      const cargarSuscripciones = async () => {
+        setLoadingSuscripciones(true);
+        try {
+          const data = await getMisSuscripciones();
+          setSuscripciones(data || []);
+        } catch {
+          setSuscripciones([]);
+        } finally {
+          setLoadingSuscripciones(false);
+        }
+      };
+      cargarSuscripciones();
     }
   }, [activeTab]);
 
@@ -104,21 +124,26 @@ export default function PerfilCliente() {
       return;
     }
     try {
-      await updatePasswordCliente({
-        current: passwordData.currentPassword,
-        new: passwordData.newPassword,
-      });
+      await updatePasswordCliente({ current: passwordData.currentPassword, new: passwordData.newPassword });
       setSeguridadSuccess("Contraseña actualizada correctamente");
       setSeguridadError("");
-      setPasswordData({
-        currentPassword: "",
-        newPassword: "",
-        confirmPassword: "",
-      });
+      setPasswordData({ currentPassword: "", newPassword: "", confirmPassword: "" });
       setTimeout(() => setSeguridadSuccess(""), 3000);
     } catch (err) {
       setSeguridadError(err.message);
       setSeguridadSuccess("");
+    }
+  };
+
+  const handleCancelarSuscripcion = async (id) => {
+    if (!confirm("¿Seguro que quieres cancelar esta suscripción?")) return;
+    try {
+      await cancelarSuscripcion(id);
+      setSuscripciones((prev) =>
+        prev.map((s) => (s.id === id ? { ...s, estado: "cancelada" } : s))
+      );
+    } catch (err) {
+      alert("Error al cancelar: " + err.message);
     }
   };
 
@@ -156,9 +181,14 @@ export default function PerfilCliente() {
         )}
 
         {activeTab === "pedidos" && (
-          <TabPedidos
-            pedidos={pedidos}
-            loading={loadingPedidos}
+          <TabPedidos pedidos={pedidos} loading={loadingPedidos} />
+        )}
+
+        {activeTab === "suscripciones" && (
+          <TabSuscripciones
+            suscripciones={suscripciones}
+            loading={loadingSuscripciones}
+            onCancelar={handleCancelarSuscripcion}
           />
         )}
 
@@ -176,67 +206,44 @@ export default function PerfilCliente() {
   );
 }
 
-// ================================================
+// ════════════════════════════════════════════════════════════════════
 // COMPONENTES AUXILIARES
-// ================================================
+// ════════════════════════════════════════════════════════════════════
 
 function AlertMessage({ message, type }) {
   if (!message) return null;
-  const className = type === "success" ? "success-popup" : "error-popup";
-  return <div className={className}>{message}</div>;
+  return <div className={type === "success" ? "success-popup" : "error-popup"}>{message}</div>;
 }
 
-function EstadoBadge({ estado }) {
-  const est = ESTADOS[estado] || ESTADOS.pendiente;
+function EstadoBadge({ estado, mapa }) {
+  const est = mapa[estado] || mapa.pendiente || mapa.cancelada || {};
   return (
-    <span
-      style={{
-        background: est.bg,
-        color: est.color,
-        padding: "4px 12px",
-        borderRadius: "12px",
-        fontSize: "12px",
-        fontWeight: "600",
-      }}
-    >
+    <span style={{ background: est.bg, color: est.color, padding: "4px 12px", borderRadius: "12px", fontSize: "12px", fontWeight: "600" }}>
       {est.text}
     </span>
   );
 }
 
-// ================================================
-// COMPONENTES DE TABS
-// ================================================
+// ════════════════════════════════════════════════════════════════════
+// TABS
+// ════════════════════════════════════════════════════════════════════
 
-function TabDatosPersonales({
-  formData,
-  setFormData,
-  handleSave,
-  successMessage,
-  errorMessage,
-}) {
+function TabDatosPersonales({ formData, setFormData, handleSave, successMessage, errorMessage }) {
   return (
     <div className="perfil-card">
       <h2 className="perfil-subtitle">Información Personal</h2>
-
       <AlertMessage message={successMessage} type="success" />
-      <AlertMessage message={errorMessage} type="error" />
-
+      <AlertMessage message={errorMessage}   type="error"   />
       <div className="perfil-grid">
         {CAMPOS.map((field) => (
-          <div
-            key={field}
-            className={field === "direccion" ? "col-span-2" : ""}
-          >
+          <div key={field} className={field === "direccion" ? "col-span-2" : ""}>
             <label className="perfil-label">
               {field.charAt(0).toUpperCase() + field.slice(1)}
             </label>
             <input
               type="text"
               value={formData[field]}
-              onChange={(e) =>
-                setFormData({ ...formData, [field]: e.target.value })
-              }
+              onChange={(e) => setFormData({ ...formData, [field]: e.target.value })}
               className="perfil-input"
             />
           </div>
@@ -254,13 +261,10 @@ function TabPedidos({ pedidos, loading }) {
   return (
     <div className="perfil-card">
       <h2 className="perfil-subtitle">Mis Pedidos</h2>
-
       {loading ? (
-        <p style={{ textAlign: "center", padding: "40px", color: "#999" }}>
-          Cargando pedidos...
-        </p>
+        <p style={{ textAlign: "center", padding: "40px", color: "#999" }}>Cargando pedidos...</p>
       ) : pedidos.length === 0 ? (
-        <EmptyPedidos />
+        <EmptyState icon={Package} mensaje="Aún no tienes pedidos realizados" />
       ) : (
         <div style={{ display: "flex", flexDirection: "column", gap: "15px" }}>
           {pedidos.map((pedido) => (
@@ -272,60 +276,47 @@ function TabPedidos({ pedidos, loading }) {
   );
 }
 
-function EmptyPedidos() {
+function TabSuscripciones({ suscripciones, loading, onCancelar }) {
   return (
-    <div
-      style={{
-        textAlign: "center",
-        padding: "60px 20px",
-        background: "#f8f9fa",
-        borderRadius: "8px",
-      }}
-    >
-      <Package size={64} style={{ color: "#ddd", marginBottom: "20px" }} />
-      <p style={{ color: "#999", fontSize: "16px" }}>
-        Aún no tienes pedidos realizados
-      </p>
+    <div className="perfil-card">
+      <h2 className="perfil-subtitle">Mis Suscripciones</h2>
+      {loading ? (
+        <p style={{ textAlign: "center", padding: "40px", color: "#999" }}>Cargando suscripciones...</p>
+      ) : suscripciones.length === 0 ? (
+        <EmptyState icon={RefreshCw} mensaje="Aún no tienes suscripciones activas" />
+      ) : (
+        <div style={{ display: "flex", flexDirection: "column", gap: "15px" }}>
+          {suscripciones.map((sus) => (
+            <SuscripcionCard key={sus.id} suscripcion={sus} onCancelar={onCancelar} />
+          ))}
+        </div>
+      )}
     </div>
   );
 }
 
-function TabSeguridad({
-  passwordData,
-  setPasswordData,
-  handlePasswordChange,
-  successMessage,
-  errorMessage,
-}) {
+function TabSeguridad({ passwordData, setPasswordData, handlePasswordChange, successMessage, errorMessage }) {
   return (
     <div className="perfil-card">
       <h2 className="perfil-subtitle">Seguridad de la Cuenta</h2>
-
       <AlertMessage message={successMessage} type="success" />
-      <AlertMessage message={errorMessage} type="error" />
-
+      <AlertMessage message={errorMessage}   type="error"   />
       <div className="space-y-6">
-        <PasswordField
-          label="Contraseña Actual"
-          value={passwordData.currentPassword}
-          onChange={(value) =>
-            setPasswordData({ ...passwordData, currentPassword: value })
-          }
-        />
-        <PasswordField
-          label="Nueva Contraseña"
-          value={passwordData.newPassword}
-          onChange={(value) =>
-            setPasswordData({ ...passwordData, newPassword: value })
-          }
-        />
-        <PasswordField
-          label="Confirmar Nueva Contraseña"
-          value={passwordData.confirmPassword}
-          onChange={(value) =>
-            setPasswordData({ ...passwordData, confirmPassword: value })
-          }
-        />
+        {[
+          { label: "Contraseña Actual",            key: "currentPassword" },
+          { label: "Nueva Contraseña",             key: "newPassword"     },
+          { label: "Confirmar Nueva Contraseña",   key: "confirmPassword" },
+        ].map(({ label, key }) => (
+          <div key={key}>
+            <label className="perfil-label">{label}</label>
+            <input
+              type="password"
+              value={passwordData[key]}
+              onChange={(e) => setPasswordData({ ...passwordData, [key]: e.target.value })}
+              className="perfil-input"
+            />
+          </div>
+        ))}
         <button onClick={handlePasswordChange} className="perfil-btn">
           <Lock className="tab-icon" />
           CAMBIAR CONTRASEÑA
@@ -335,167 +326,164 @@ function TabSeguridad({
   );
 }
 
-function PasswordField({ label, value, onChange }) {
-  return (
-    <div>
-      <label className="perfil-label">{label}</label>
-      <input
-        type="password"
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
-        className="perfil-input"
-      />
-    </div>
-  );
-}
-
-// ================================================
-// COMPONENTES DE PEDIDOS
-// ================================================
+// ════════════════════════════════════════════════════════════════════
+// CARDS DE PEDIDOS
+// ════════════════════════════════════════════════════════════════════
 
 function PedidoCard({ pedido }) {
   return (
-    <div
-      style={{
-        background: "#fff",
-        border: "1px solid #e0e0e0",
-        borderRadius: "8px",
-        padding: "20px",
-        boxShadow: "0 2px 4px rgba(0,0,0,0.05)",
-      }}
-    >
-      <PedidoHeader pedido={pedido} />
-      <PedidoDetalles pedido={pedido} />
-      {pedido.direccion_envio && <DireccionEnvio direccion={pedido.direccion_envio} />}
-      <PedidoTotales pedido={pedido} />
-      {pedido.factura_url && <FacturaButton url={pedido.factura_url} />}
-    </div>
-  );
-}
-
-function PedidoHeader({ pedido }) {
-  return (
-    <div
-      style={{
-        display: "flex",
-        justifyContent: "space-between",
-        alignItems: "center",
-        marginBottom: "15px",
-        paddingBottom: "15px",
-        borderBottom: "1px solid #f0f0f0",
-      }}
-    >
-      <div>
-        <h3
-          style={{
-            margin: "0 0 5px 0",
-            fontSize: "16px",
-            fontWeight: "600",
-            color: "#333",
-          }}
-        >
-          {pedido.numero_pedido}
-        </h3>
-        <div style={{ display: "flex", gap: "15px", fontSize: "13px", color: "#666" }}>
-          <span style={{ display: "flex", alignItems: "center", gap: "5px" }}>
-            <Calendar size={14} />
-            {new Date(pedido.created_at).toLocaleDateString("es-ES")}
-          </span>
-          <span style={{ display: "flex", alignItems: "center", gap: "5px" }}>
-            <CreditCard size={14} />
-            {pedido.metodo_pago || "Tarjeta"}
-          </span>
+    <div style={{ background: "#fff", border: "1px solid #e0e0e0", borderRadius: "8px", padding: "20px", boxShadow: "0 2px 4px rgba(0,0,0,0.05)" }}>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "15px", paddingBottom: "15px", borderBottom: "1px solid #f0f0f0" }}>
+        <div>
+          <h3 style={{ margin: "0 0 5px 0", fontSize: "16px", fontWeight: "600", color: "#333" }}>
+            {pedido.numero_pedido}
+          </h3>
+          <div style={{ display: "flex", gap: "15px", fontSize: "13px", color: "#666" }}>
+            <span style={{ display: "flex", alignItems: "center", gap: "5px" }}>
+              <Calendar size={14} />
+              {new Date(pedido.created_at).toLocaleDateString("es-ES")}
+            </span>
+            <span style={{ display: "flex", alignItems: "center", gap: "5px" }}>
+              <CreditCard size={14} />
+              {pedido.metodo_pago || "Tarjeta"}
+            </span>
+          </div>
         </div>
+        <EstadoBadge estado={pedido.estado} mapa={ESTADOS_PEDIDO} />
       </div>
-      <EstadoBadge estado={pedido.estado} />
-    </div>
-  );
-}
 
-function PedidoDetalles({ pedido }) {
-  return (
-    <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "15px", marginBottom: "15px" }}>
-      <div>
-        <p style={{ margin: "0 0 5px 0", fontSize: "12px", color: "#999" }}>
-          Tipo de pedido
-        </p>
-        <p style={{ margin: 0, fontWeight: "500" }}>
-          {pedido.tipo_pedido === "suscripcion" ? "🔄 Suscripción" : "🛒 Carrito"}
-        </p>
-      </div>
-      <div>
-        <p style={{ margin: "0 0 5px 0", fontSize: "12px", color: "#999" }}>
-          Entrega estimada
-        </p>
-        <p style={{ margin: 0, fontWeight: "500", display: "flex", alignItems: "center", gap: "5px" }}>
-          <Truck size={14} />
-          {pedido.fecha_entrega_estimada
-            ? new Date(pedido.fecha_entrega_estimada).toLocaleDateString("es-ES")
-            : "Por confirmar"}
-        </p>
-      </div>
-    </div>
-  );
-}
-
-function DireccionEnvio({ direccion }) {
-  return (
-    <div style={{ marginBottom: "15px", fontSize: "13px" }}>
-      <p style={{ margin: "0 0 5px 0", color: "#999" }}>Dirección de envío:</p>
-      <p style={{ margin: 0, color: "#666" }}>{direccion}</p>
-    </div>
-  );
-}
-
-function PedidoTotales({ pedido }) {
-  return (
-    <div
-      style={{
-        background: "#f8f9fa",
-        padding: "12px",
-        borderRadius: "6px",
-        display: "flex",
-        justifyContent: "space-between",
-        alignItems: "center",
-      }}
-    >
-      <div style={{ fontSize: "13px" }}>
-        <div style={{ marginBottom: "3px" }}>
-          Subtotal: <strong>€{parseFloat(pedido.subtotal || 0).toFixed(2)}</strong>
+      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "15px", marginBottom: "15px" }}>
+        <div>
+          <p style={{ margin: "0 0 5px 0", fontSize: "12px", color: "#999" }}>Tipo de pedido</p>
+          <p style={{ margin: 0, fontWeight: "500" }}>🛒 Carrito</p>
         </div>
         <div>
-          Envío: <strong>€{parseFloat(pedido.gastos_envio || 0).toFixed(2)}</strong>
+          <p style={{ margin: "0 0 5px 0", fontSize: "12px", color: "#999" }}>Entrega estimada</p>
+          <p style={{ margin: 0, fontWeight: "500", display: "flex", alignItems: "center", gap: "5px" }}>
+            <Truck size={14} />
+            {pedido.fecha_entrega_estimada
+              ? new Date(pedido.fecha_entrega_estimada).toLocaleDateString("es-ES")
+              : "Por confirmar"}
+          </p>
         </div>
       </div>
-      <div style={{ textAlign: "right" }}>
-        <p style={{ margin: "0 0 3px 0", fontSize: "12px", color: "#999" }}>Total</p>
-        <p style={{ margin: 0, fontSize: "20px", fontWeight: "700", color: "#4caf50" }}>
-          €{parseFloat(pedido.total || 0).toFixed(2)}
-        </p>
+
+      {pedido.direccion_envio && (
+        <div style={{ marginBottom: "15px", fontSize: "13px" }}>
+          <p style={{ margin: "0 0 5px 0", color: "#999" }}>Dirección de envío:</p>
+          <p style={{ margin: 0, color: "#666" }}>{pedido.direccion_envio}</p>
+        </div>
+      )}
+
+      <div style={{ background: "#f8f9fa", padding: "12px", borderRadius: "6px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+        <div style={{ fontSize: "13px" }}>
+          <div style={{ marginBottom: "3px" }}>Subtotal: <strong>€{parseFloat(pedido.subtotal || 0).toFixed(2)}</strong></div>
+          <div>Envío: <strong>€{parseFloat(pedido.gastos_envio || 0).toFixed(2)}</strong></div>
+        </div>
+        <div style={{ textAlign: "right" }}>
+          <p style={{ margin: "0 0 3px 0", fontSize: "12px", color: "#999" }}>Total</p>
+          <p style={{ margin: 0, fontSize: "20px", fontWeight: "700", color: "#4caf50" }}>
+            €{parseFloat(pedido.total || 0).toFixed(2)}
+          </p>
+        </div>
       </div>
+
+      {pedido.factura_url && (
+        <a href={pedido.factura_url} target="_blank" rel="noopener noreferrer"
+          style={{ display: "inline-block", marginTop: "12px", padding: "8px 16px", background: "#2c3e50", color: "#fff", borderRadius: "6px", fontSize: "13px", textDecoration: "none", fontWeight: "500" }}>
+          📄 Ver Factura
+        </a>
+      )}
     </div>
   );
 }
 
-function FacturaButton({ url }) {
+// ════════════════════════════════════════════════════════════════════
+// CARDS DE SUSCRIPCIONES
+// ════════════════════════════════════════════════════════════════════
+
+function SuscripcionCard({ suscripcion, onCancelar }) {
+  const proximaEntrega = suscripcion.entregas
+    ?.filter((e) => e.estado === "pendiente")
+    .sort((a, b) => new Date(a.fecha_programada) - new Date(b.fecha_programada))[0];
+
   return (
-    <a
-      href={url}
-      target="_blank"
-      rel="noopener noreferrer"
-      style={{
-        display: "inline-block",
-        marginTop: "12px",
-        padding: "8px 16px",
-        background: "#2c3e50",
-        color: "#fff",
-        borderRadius: "6px",
-        fontSize: "13px",
-        textDecoration: "none",
-        fontWeight: "500",
-      }}
-    >
-      📄 Ver Factura
-    </a>
+    <div style={{ background: "#fff", border: "1px solid #e0e0e0", borderRadius: "8px", padding: "20px", boxShadow: "0 2px 4px rgba(0,0,0,0.05)" }}>
+      {/* Header */}
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "15px", paddingBottom: "15px", borderBottom: "1px solid #f0f0f0" }}>
+        <div>
+          <h3 style={{ margin: "0 0 5px 0", fontSize: "16px", fontWeight: "600", color: "#333" }}>
+            🔄 Caja {suscripcion.tipo_caja}
+          </h3>
+          <div style={{ display: "flex", gap: "15px", fontSize: "13px", color: "#666" }}>
+            <span>
+              <Calendar size={14} style={{ verticalAlign: "middle", marginRight: "4px" }} />
+              Desde {new Date(suscripcion.fecha_inicio).toLocaleDateString("es-ES")}
+            </span>
+            <span style={{ textTransform: "capitalize" }}>
+              Frecuencia: {suscripcion.frecuencia}
+            </span>
+          </div>
+        </div>
+        <EstadoBadge estado={suscripcion.estado} mapa={ESTADOS_SUSCRIPCION} />
+      </div>
+
+      {/* Detalles */}
+      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "15px", marginBottom: "15px" }}>
+        <div>
+          <p style={{ margin: "0 0 5px 0", fontSize: "12px", color: "#999" }}>Precio por entrega</p>
+          <p style={{ margin: 0, fontSize: "18px", fontWeight: "700", color: "#4caf50" }}>
+            €{parseFloat(suscripcion.precio || 0).toFixed(2)}
+          </p>
+        </div>
+        <div>
+          <p style={{ margin: "0 0 5px 0", fontSize: "12px", color: "#999" }}>Próxima entrega</p>
+          <p style={{ margin: 0, fontWeight: "500", display: "flex", alignItems: "center", gap: "5px" }}>
+            <Truck size={14} />
+            {proximaEntrega
+              ? new Date(proximaEntrega.fecha_programada).toLocaleDateString("es-ES")
+              : "—"}
+          </p>
+        </div>
+      </div>
+
+      {/* Entregas programadas */}
+      {suscripcion.entregas?.length > 0 && (
+        <div style={{ background: "#f8f9fa", padding: "12px", borderRadius: "6px", marginBottom: "15px", fontSize: "12px" }}>
+          <p style={{ margin: "0 0 8px 0", fontWeight: "600", color: "#555" }}>Entregas programadas:</p>
+          {suscripcion.entregas.slice(0, 3).map((e) => (
+            <div key={e.id} style={{ display: "flex", justifyContent: "space-between", padding: "3px 0", color: "#666" }}>
+              <span>{new Date(e.fecha_programada).toLocaleDateString("es-ES")}</span>
+              <span style={{ textTransform: "capitalize", color: e.estado === "entregada" ? "#28a745" : "#888" }}>
+                {e.estado}
+              </span>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* Botón cancelar */}
+      {suscripcion.estado === "activa" && (
+        <button
+          onClick={() => onCancelar(suscripcion.id)}
+          style={{ padding: "8px 16px", background: "#dc3545", color: "#fff", border: "none", borderRadius: "6px", fontSize: "13px", cursor: "pointer", fontWeight: "500" }}
+        >
+          Cancelar suscripción
+        </button>
+      )}
+    </div>
+  );
+}
+
+// ════════════════════════════════════════════════════════════════════
+// ESTADO VACÍO GENÉRICO
+// ════════════════════════════════════════════════════════════════════
+
+function EmptyState({ icon: Icon, mensaje }) {
+  return (
+    <div style={{ textAlign: "center", padding: "60px 20px", background: "#f8f9fa", borderRadius: "8px" }}>
+      <Icon size={64} style={{ color: "#ddd", marginBottom: "20px" }} />
+      <p style={{ color: "#999", fontSize: "16px" }}>{mensaje}</p>
+    </div>
   );
 }

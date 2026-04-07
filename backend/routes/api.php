@@ -37,7 +37,7 @@ Route::apiResource('valoraciones', ValoracionController::class)
 |--------------------------------------------------------------------------
 */
 Route::post('register', [AuthController::class, 'register']);
-Route::post('login', [AuthController::class, 'login']);
+Route::post('login',    [AuthController::class, 'login']);
 
 /*
 |--------------------------------------------------------------------------
@@ -45,12 +45,13 @@ Route::post('login', [AuthController::class, 'login']);
 |--------------------------------------------------------------------------
 */
 Route::middleware('auth:sanctum')->group(function () {
+
     // Perfil del usuario autenticado
-    Route::get('me', [AuthController::class, 'me']);
-    Route::post('logout', [AuthController::class, 'logout']);
+    Route::get('me',     [AuthController::class, 'me']);
+    Route::post('logout',[AuthController::class, 'logout']);
 
     // Perfil cliente
-    Route::put('cliente/perfil', [AuthController::class, 'updatePerfil']);
+    Route::put('cliente/perfil',   [AuthController::class, 'updatePerfil']);
     Route::put('cliente/password', [AuthController::class, 'updatePassword']);
 
     // Usuarios
@@ -60,49 +61,34 @@ Route::middleware('auth:sanctum')->group(function () {
     // Pedidos
     Route::apiResource('pedidos', PedidoController::class)
         ->parameters(['pedidos' => 'pedido']);
-
     Route::get('mis-pedidos', [PedidoController::class, 'misPedidos']);
 
-    /*
-    |--------------------------------------------------------------------------
-    | Carrito del usuario autenticado
-    |--------------------------------------------------------------------------
-    */
-    Route::get('carrito', [CarritoController::class, 'show']);          // obtener carrito
-    Route::post('carrito/add', [CarritoController::class, 'addItem']);  // añadir producto
-    Route::put('carrito/items/{item}', [CarritoController::class, 'updateItem']); // actualizar cantidad
-    Route::delete('carrito/items/{item}', [CarritoController::class, 'removeItem']); // eliminar producto
-    Route::delete('carrito/clear', [CarritoController::class, 'clearCarrito']);     // vaciar carrito
+    // Carrito
+    Route::get('carrito',                      [CarritoController::class, 'show']);
+    Route::post('carrito/add',                 [CarritoController::class, 'addItem']);
+    Route::put('carrito/items/{item}',         [CarritoController::class, 'updateItem']);
+    Route::delete('carrito/items/{item}',      [CarritoController::class, 'removeItem']);
+    Route::delete('carrito/clear',             [CarritoController::class, 'clearCarrito']);
 
     // Suscripciones
     Route::apiResource('suscripciones', SuscripcionController::class)
         ->parameters(['suscripciones' => 'suscripcion']);
+    Route::get('mis-suscripciones',                          [SuscripcionController::class, 'misSuscripciones']);
+    Route::post('suscripciones/{suscripcion}/cancelar',      [SuscripcionController::class, 'cancelar']);
 
     // Notificaciones
     Route::apiResource('notificaciones', NotificacionController::class)
         ->parameters(['notificaciones' => 'notificacion']);
 
-    /*
-    |--------------------------------------------------------------------------
-    | Productos protegidos (crear, editar, borrar)
-    |--------------------------------------------------------------------------
-    */
+    // Productos protegidos (crear, editar, borrar)
     Route::apiResource('productos', ProductoController::class)
         ->only(['store', 'update', 'destroy'])
         ->parameters(['productos' => 'producto']);
 
-    /*
-    |--------------------------------------------------------------------------
-    | Imágenes de productos (subir y borrar)
-    |--------------------------------------------------------------------------
-    */
-    Route::post('productos/{producto}/imagenes', [ProductoImagenController::class, 'store']);
-    Route::delete('productos/{producto}/imagenes/{imagen}', [ProductoImagenController::class, 'destroy']);
+    // Imágenes de productos
+    Route::post('productos/{producto}/imagenes',                    [ProductoImagenController::class, 'store']);
+    Route::delete('productos/{producto}/imagenes/{imagen}',         [ProductoImagenController::class, 'destroy']);
 
-    /*
-    |--------------------------------------------------------------------------
-    | Facturas (requieren login)
-    |--------------------------------------------------------------------------
-    */
+    // Facturas
     Route::post('facturas/generar', [FacturaController::class, 'generar']);
 });

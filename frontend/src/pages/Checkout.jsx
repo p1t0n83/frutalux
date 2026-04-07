@@ -11,88 +11,90 @@ const GASTOS_ENVIO = 3.50;
 const PRECIOS_CAJAS = {
   pequena: { precio: 19.99, kg: 5 },
   mediana: { precio: 34.99, kg: 9 },
-  grande: { precio: 49.99, kg: 13 }
+  grande:  { precio: 49.99, kg: 13 },
 };
 
 const DESCUENTOS_FRECUENCIA = {
-  semanal: 5,
+  semanal:   5,
   quincenal: 3,
-  mensual: 5
+  mensual:   0,
 };
 
 const METODOS_PAGO = [
-  { id: "tarjeta", nombre: "Tarjeta de crédito/débito", icon: "💳" },
-  { id: "transferencia", nombre: "Transferencia bancaria", icon: "🏦" },
-  { id: "reembolso", nombre: "Contra reembolso", icon: "💵" }
+  { id: "tarjeta",        nombre: "Tarjeta de crédito/débito", icon: "💳" },
+  { id: "transferencia",  nombre: "Transferencia bancaria",    icon: "🏦" },
+  { id: "reembolso",      nombre: "Contra reembolso",          icon: "💵" },
 ];
 
 export default function Checkout({ tipo = "pedido" }) {
   const navigate = useNavigate();
   const location = useLocation();
   const { clear } = useCarrito();
-  
-  const [metodoPago, setMetodoPago] = useState("tarjeta");
-  const [mensaje, setMensaje] = useState("");
-  const [productos, setProductos] = useState([]);
-  const [subtotal, setSubtotal] = useState(0);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
-  const [verFactura, setVerFactura] = useState(false);
-  
+
+  const [metodoPago, setMetodoPago]   = useState("tarjeta");
+  const [mensaje, setMensaje]         = useState("");
+  const [productos, setProductos]     = useState([]);
+  const [subtotal, setSubtotal]       = useState(0);
+  const [loading, setLoading]         = useState(true);
+  const [error, setError]             = useState("");
+  const [verFactura, setVerFactura]   = useState(false);
+
+  // Datos crudos de la suscripción (tamano + frecuencia) para enviar al backend
+  const [suscripcionRaw, setSuscripcionRaw] = useState(null);
+
   const [cliente, setCliente] = useState({
-    nombre: "",
-    email: "",
-    direccion: "",
-    cp: "",
-    localidad: "",
-    provincia: ""
+    nombre: "", email: "", direccion: "", cp: "", localidad: "", provincia: "",
   });
 
-  const esSuscripcion = tipo === "suscripcion" || location.pathname === "/checkout-suscripcion";
+  const esSuscripcion =
+    tipo === "suscripcion" || location.pathname === "/checkout-suscripcion";
 
+  // ─── Calcular precio de suscripción ───────────────────────────────────────
   const calcularPrecioSuscripcion = (tamano, frecuencia) => {
-    const { precio, kg } = PRECIOS_CAJAS[tamano] || PRECIOS_CAJAS.pequena;
-    const descuento = DESCUENTOS_FRECUENCIA[frecuencia] || 0;
+    const { precio, kg } = PRECIOS_CAJAS[tamano] || PRECIOS_CAJAS.mediana;
+    const descuento = DESCUENTOS_FRECUENCIA[frecuencia] ?? 0;
     const precioFinal = precio * (1 - descuento / 100);
-    
     return { precio, precioFinal, kg, descuento };
   };
 
+  // ─── Cargar datos de suscripción desde sessionStorage ─────────────────────
   const cargarSuscripcion = () => {
-    const suscripcionData = sessionStorage.getItem("suscripcionData");
-    
-    if (!suscripcionData) {
+    const raw = sessionStorage.getItem("suscripcionData");
+
+    if (!raw) {
       setError("No hay datos de suscripción. Por favor, configura tu caja primero.");
       setLoading(false);
       setTimeout(() => navigate("/preferencias-caja"), 2000);
       return;
     }
 
-    const data = JSON.parse(suscripcionData);
-    const { precio, precioFinal, kg, descuento } = calcularPrecioSuscripcion(data.tamano, data.frecuencia);
-    
-    const nombreCaja = `Caja ${data.tamano.charAt(0).toUpperCase() + data.tamano.slice(1)} - Entrega ${data.frecuencia}`;
-    
-    const productosSuscripcion = [{
-      producto: {
-        nombre: nombreCaja + (descuento > 0 ? ` (${descuento}% descuento)` : '')
-      },
-      cantidad_kg: 1,
-      precio_unitario: precioFinal,
-      kg_caja: kg,
-      precioOriginal: precio,
-      descuento: descuento,
-      esCaja: true
-    }];
+    const data = JSON.parse(raw);
+    setSuscripcionRaw({ tamano: data.tamano, frecuencia: data.frecuencia });
 
-    setProductos(productosSuscripcion);
+    const { precio, precioFinal, kg, descuento } = calcularPrecioSuscripcion(
+      data.tamano,
+      data.frecuencia
+    );
+
+    const nombreCaja = `Caja ${data.tamano.charAt(0).toUpperCase() + data.tamano.slice(1)} - Entrega ${data.frecuencia}`;
+
+    setProductos([{
+      producto:        { nombre: nombreCaja + (descuento > 0 ? ` (${descuento}% descuento)` : "") },
+      cantidad_kg:     1,
+      precio_unitario: precioFinal,
+      kg_caja:         kg,
+      precioOriginal:  precio,
+      descuento,
+      esCaja:          true,
+    }]);
     setSubtotal(precioFinal);
     setLoading(false);
   };
 
+  // ─── Cargar carrito ───────────────────────────────────────────────────────
   const cargarCarrito = async () => {
     try {
-      const data = await getCarrito();
+      const data  = await getCarrito();
       const items = data.items || [];
 
       if (items.length === 0) {
@@ -105,9 +107,9 @@ export default function Checkout({ tipo = "pedido" }) {
       setProductos(items);
 
       const calculoSubtotal = items.reduce((acc, item) => {
-        const precio = parseFloat(item.precio_unitario) || 0;
-        const cantidad = parseFloat(item.cantidad_kg) || 0;
-        return acc + (precio * cantidad);
+        const precio   = parseFloat(item.precio_unitario) || 0;
+        const cantidad = parseFloat(item.cantidad_kg)     || 0;
+        return acc + precio * cantidad;
       }, 0);
 
       setSubtotal(calculoSubtotal);
@@ -120,85 +122,89 @@ export default function Checkout({ tipo = "pedido" }) {
   };
 
   useEffect(() => {
-    if (esSuscripcion) {
-      cargarSuscripcion();
-    } else {
-      cargarCarrito();
-    }
+    if (esSuscripcion) cargarSuscripcion();
+    else               cargarCarrito();
   }, [tipo, location.pathname]);
 
+  // ─── Validación ───────────────────────────────────────────────────────────
   const validarFormulario = () => {
     if (!cliente.nombre || !cliente.direccion || !cliente.cp || !cliente.localidad) {
       setMensaje("❌ Por favor completa todos los campos obligatorios");
       setTimeout(() => setMensaje(""), 4000);
       return false;
     }
-
     if (!cliente.email || !cliente.email.includes("@")) {
       setMensaje("❌ Por favor introduce un email válido");
       setTimeout(() => setMensaje(""), 4000);
       return false;
     }
-
     if (productos.length === 0) {
       setMensaje("❌ No hay productos en el pedido");
       setTimeout(() => setMensaje(""), 4000);
       return false;
     }
-
     return true;
   };
 
+  // ─── Confirmar ────────────────────────────────────────────────────────────
   const handleConfirmar = async () => {
     if (!validarFormulario()) return;
 
-    setMensaje("⏳ Generando factura...");
+    setMensaje("⏳ Procesando...");
 
     try {
-      const productosFactura = productos.map(prod => ({
-        nombre: prod.producto?.nombre || "Producto",
+      const productosFactura = productos.map((prod) => ({
+        nombre:   prod.producto?.nombre || "Producto",
         cantidad: prod.cantidad_kg || 1,
-        precio: prod.precio_unitario || 0,
+        precio:   prod.precio_unitario || 0,
       }));
 
       const tipoFactura = esSuscripcion ? "suscripcion" : "pedido";
-      const total = subtotal + GASTOS_ENVIO;
+      const total       = subtotal + GASTOS_ENVIO;
 
-      const factura = await generarFactura({
-        tipo: tipoFactura,
-        productos: productosFactura,
+      const payload = {
+        tipo:              tipoFactura,
+        productos:         productosFactura,
         subtotal,
-        gastos_envio: GASTOS_ENVIO,
+        gastos_envio:      GASTOS_ENVIO,
         total,
         metodoPago,
-        cliente_nombre: cliente.nombre,
-        cliente_email: cliente.email,
+        cliente_nombre:    cliente.nombre,
+        cliente_email:     cliente.email,
         cliente_direccion: cliente.direccion,
-        cliente_cp: cliente.cp,
+        cliente_cp:        cliente.cp,
         cliente_localidad: cliente.localidad,
-        cliente_provincia: cliente.provincia
-      });
+        cliente_provincia: cliente.provincia,
+        // ← NUEVO: datos específicos de suscripción para el backend
+        ...(esSuscripcion && suscripcionRaw
+          ? { tipo_caja: suscripcionRaw.tamano, frecuencia: suscripcionRaw.frecuencia }
+          : {}),
+      };
 
-      setMensaje("✅ Pedido confirmado con éxito. Factura generada.");
-      
+      const factura = await generarFactura(payload);
+
+      setMensaje(
+        esSuscripcion
+          ? "✅ Suscripción activada con éxito. Factura generada."
+          : "✅ Pedido confirmado con éxito. Factura generada."
+      );
+
       if (verFactura && factura.url) {
         window.open(factura.url, "_blank");
       }
 
       setTimeout(async () => {
         setMensaje("");
-
-        if (tipoFactura === "suscripcion") {
+        if (esSuscripcion) {
           sessionStorage.removeItem("suscripcionData");
-          navigate("/");
+          navigate("/perfil");
         } else {
           try {
             await clear();
-            navigate("/");
-          } catch (error) {
-            console.error("⚠️ Error al vaciar el carrito:", error);
-            navigate("/");
+          } catch (e) {
+            console.error("⚠️ Error al vaciar el carrito:", e);
           }
+          navigate("/");
         }
       }, 3000);
 
@@ -209,10 +215,10 @@ export default function Checkout({ tipo = "pedido" }) {
     }
   };
 
-  const actualizarCliente = (campo, valor) => {
+  const actualizarCliente = (campo, valor) =>
     setCliente({ ...cliente, [campo]: valor });
-  };
 
+  // ─── Pantallas de carga / error ───────────────────────────────────────────
   if (loading) {
     return (
       <div className="checkout-container">
@@ -227,13 +233,7 @@ export default function Checkout({ tipo = "pedido" }) {
     return (
       <div className="checkout-container">
         <div className="checkout-wrapper">
-          <div style={{
-            background: "#fee",
-            padding: "20px",
-            borderRadius: "8px",
-            textAlign: "center",
-            color: "#c00"
-          }}>
+          <div style={{ background: "#fee", padding: "20px", borderRadius: "8px", textAlign: "center", color: "#c00" }}>
             <AlertCircle size={48} style={{ marginBottom: "10px" }} />
             <p>{error}</p>
           </div>
@@ -252,6 +252,7 @@ export default function Checkout({ tipo = "pedido" }) {
         </h1>
 
         <div className="checkout-grid">
+          {/* ── Formulario ── */}
           <div className="checkout-form">
             <div className="checkout-card">
               <div className="checkout-card-header">
@@ -259,48 +260,22 @@ export default function Checkout({ tipo = "pedido" }) {
                 <h2>Datos de Envío</h2>
               </div>
               <div className="checkout-card-body">
-                <input
-                  type="text"
-                  placeholder="Nombre completo *"
-                  value={cliente.nombre}
-                  onChange={(e) => actualizarCliente("nombre", e.target.value)}
-                  required
-                />
-                <input
-                  type="email"
-                  placeholder="Email *"
-                  value={cliente.email}
-                  onChange={(e) => actualizarCliente("email", e.target.value)}
-                  required
-                />
-                <input
-                  type="text"
-                  placeholder="Dirección *"
-                  value={cliente.direccion}
-                  onChange={(e) => actualizarCliente("direccion", e.target.value)}
-                  required
-                />
-                <input
-                  type="text"
-                  placeholder="Código Postal *"
-                  value={cliente.cp}
-                  onChange={(e) => actualizarCliente("cp", e.target.value)}
-                  required
-                />
-                <input
-                  type="text"
-                  placeholder="Localidad *"
-                  value={cliente.localidad}
-                  onChange={(e) => actualizarCliente("localidad", e.target.value)}
-                  required
-                />
-                <input
-                  type="text"
-                  placeholder="Provincia *"
-                  value={cliente.provincia}
-                  onChange={(e) => actualizarCliente("provincia", e.target.value)}
-                  required
-                />
+                {[
+                  { campo: "nombre",    ph: "Nombre completo *",  type: "text"  },
+                  { campo: "email",     ph: "Email *",             type: "email" },
+                  { campo: "direccion", ph: "Dirección *",         type: "text"  },
+                  { campo: "cp",        ph: "Código Postal *",     type: "text"  },
+                  { campo: "localidad", ph: "Localidad *",         type: "text"  },
+                  { campo: "provincia", ph: "Provincia",           type: "text"  },
+                ].map(({ campo, ph, type }) => (
+                  <input
+                    key={campo}
+                    type={type}
+                    placeholder={ph}
+                    value={cliente[campo]}
+                    onChange={(e) => actualizarCliente(campo, e.target.value)}
+                  />
+                ))}
               </div>
             </div>
 
@@ -335,24 +310,19 @@ export default function Checkout({ tipo = "pedido" }) {
             </div>
           </div>
 
+          {/* ── Resumen ── */}
           <div className="checkout-summary">
-            <h2>Tu Pedido</h2>
+            <h2>{esSuscripcion ? "Tu Suscripción" : "Tu Pedido"}</h2>
+
             {esSuscripcion && (
-              <div style={{
-                background: "#fff3cd",
-                padding: "12px",
-                borderRadius: "6px",
-                marginBottom: "15px",
-                fontSize: "13px",
-                border: "1px solid #ffc107"
-              }}>
-                <strong>🔄 Suscripción activa</strong>
+              <div style={{ background: "#fff3cd", padding: "12px", borderRadius: "6px", marginBottom: "15px", fontSize: "13px", border: "1px solid #ffc107" }}>
+                <strong>🔄 Suscripción recurrente</strong>
                 <p style={{ margin: "5px 0 0 0", fontSize: "12px", color: "#856404" }}>
                   Precio por entrega con descuento aplicado
                 </p>
               </div>
             )}
-            
+
             <div className="summary-items">
               {productos.length === 0 ? (
                 <p>No hay productos</p>
@@ -380,17 +350,17 @@ export default function Checkout({ tipo = "pedido" }) {
                 ))
               )}
             </div>
-            
+
             <div className="summary-totals">
-              <div><span>Subtotal:</span><span>€{subtotal.toFixed(2)}</span></div>
-              <div><span>Gastos envío:</span><span>€{GASTOS_ENVIO.toFixed(2)}</span></div>
+              <div><span>Subtotal:</span>     <span>€{subtotal.toFixed(2)}</span></div>
+              <div><span>Gastos envío:</span> <span>€{GASTOS_ENVIO.toFixed(2)}</span></div>
               <div className="summary-total">
                 <span>Total:</span>
                 <span>€{total.toFixed(2)}</span>
               </div>
             </div>
-            
-            <label style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+
+            <label style={{ display: "flex", alignItems: "center", gap: "8px", marginTop: "12px" }}>
               <input
                 type="checkbox"
                 checked={verFactura}
@@ -398,16 +368,16 @@ export default function Checkout({ tipo = "pedido" }) {
               />
               Ver factura al finalizar
             </label>
-            
+
             <button className="btn-confirmar" onClick={handleConfirmar}>
               <CheckCircle className="icon" />
-              {esSuscripcion ? "CONFIRMAR SUSCRIPCIÓN" : "CONFIRMAR PEDIDO"}
+              {esSuscripcion ? "ACTIVAR SUSCRIPCIÓN" : "CONFIRMAR PEDIDO"}
             </button>
 
             {mensaje && (
               <div className={
                 mensaje.includes("✅") ? "mensaje-exito" :
-                mensaje.includes("⏳") ? "mensaje-info" :
+                mensaje.includes("⏳") ? "mensaje-info"  :
                 "mensaje-error"
               }>
                 {mensaje}
